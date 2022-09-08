@@ -1,4 +1,4 @@
-import Tile from './Tile'
+import Tile from './Tile.js'
 import perlinNoise3d from 'perlin-noise-3d'
 
 export default class Terrain {

@@ -1,5 +1,5 @@
-import Person from "./Person";
-import RandomParent from "./RandomParent";
+import Person from "./Person.js";
+import RandomParent from "./RandomParent.js";
 
 export default class Population {
     constructor(surface, settings, data) {

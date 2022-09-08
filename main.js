@@ -1,7 +1,7 @@
-import FoodMap from './classes/FoodMap'
-import Terrain from './classes/Terrain'
-import Population from './classes/Population'
-import Info from './classes/Info'
+import FoodMap from './classes/FoodMap.js'
+import Terrain from './classes/Terrain.js'
+import Population from './classes/Population.js'
+import Info from './classes/Info.js'
 
 const canvas = document.querySelector('.canvas')
 const ctx = canvas.getContext("2d")
