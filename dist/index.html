@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <title>Life Sim</title>
+    <script type="module" crossorigin src="/assets/index.31170e02.js"></script>
+    <link rel="stylesheet" href="/assets/index.38d88f9b.css">
+  </head>
+  <body>
+    <div id="app">
+      <canvas class="canvas"></canvas>
+      <div class="screen">
+        <div class="info">
+          <h2 id="population">Population: 10</h2>
+          <br/>
+          <h3 id="male">Male: 5</h3>
+          <h3 id="female">Female: 5</h3>
+        </div>
+
+        <div class="controls">
+          <button id="addMale">Add male</button>
+          <button id="addFemale">Add female</button>
+          <button id="clearPop">Clear</button>
+        </div>
+        
+        <div class="settingsButtonWrapper">
+          <button id="settingsBtn">Settings</button>
+        </div>
+
+        <div class="settings hidden">
+          <form>
+            <div class="input-wrapper">
+              <label for="food">Food density</label>
+              <input id="food" type="range" />
+            </div>
+
+            <div class="input-wrapper">
+              <label for="water">Water density</label>
+              <input id="water" type="range" />
+            </div>
+
+            <div class="input-wrapper-inline">
+              <input id="viewrange" type="checkbox" />
+              <label for="viewrange">Show viewrange: </label>
+            </div>
+
+            <div class="input-wrapper-inline">
+              <input id="hud" type="checkbox" />
+              <label for="hud">Show HUD</label>
+            </div>
+
+            <div class="input-wrapper-inline">
+              <input id="destination" type="checkbox" />
+              <label for="destination">Show destination</label>
+            </div>
+
+            <div class="input-wrapper-inline">
+              <label for="malesCount">Number of males: </label>
+              <input id="malesCount" type="number" />
+            </div>
+
+            <div class="input-wrapper-inline">
+              <label for="femalesCount">Number of females: </label>
+              <input id="femalesCount" type="number" /> 
+            </div>
+
+            <div class="input-wrapper-inline">
+              <label for="worldSize">World size: </label>
+              <input id="worldSize" type="number" /> 
+            </div>
+          </form>
+
+          <button id="applySettings">Apply and restart</button>
+        </div>
+      </div>
+
+    </div>
+    <script src="https://unpkg.com/perlin-noise-3d"></script>
+    
+  </body>
+</html>
