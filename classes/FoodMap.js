@@ -1,0 +1,33 @@
+import Food from './Food'
+
+export default class FoodMap {
+    constructor(surface, settings , grid) {
+        this.settings = settings
+        this.surface = surface
+        this.GRID = grid
+
+        this.WIDTH = settings.width
+        this.HEIGHT = settings.heigth
+        this.tileSize = Math.round(this.WIDTH / settings.x)
+        this.FOOD = []
+
+        this.createFood()
+    }
+
+    createFood() {
+        var density = this.settings.food
+
+        for (let tile of this.GRID) {
+            var randomNumber = Math.random()
+            if (tile.type === 'ground' && randomNumber < density) {
+                let x = tile.posX + Math.round(tile.size/2)
+                let y = tile.posY + Math.round(tile.size/2)
+                this.FOOD.push(new Food(x, y, this.surface, this.tileSize))
+            }
+        }
+    }
+
+    update() {
+        this.FOOD.forEach((food) => food.update())
+    }
+}
