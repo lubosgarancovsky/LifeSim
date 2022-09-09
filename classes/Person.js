@@ -97,27 +97,27 @@ export default class Person {
             // HUD background
             this.surface.beginPath()
             this.surface.fillStyle = this.isSick ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)'
-            this.surface.fillRect(this.posX - 25, this.posY - 30, 50, 12)
+            this.surface.fillRect(this.posX - 25, this.posY - this.size - 24, 50, 12)
 
             // HUNGER
             this.surface.beginPath()
             this.surface.fillStyle = 'rgba(250, 128, 52, 1)'
-            this.surface.fillRect(this.posX - 25, this.posY - 30, (this.hunger / 2), 3)
+            this.surface.fillRect(this.posX - 25, this.posY - this.size - 24, (this.hunger / 2), 3)
 
             // THIRST
             this.surface.beginPath()
             this.surface.fillStyle = 'rgba(110, 245, 255, 1)'
-            this.surface.fillRect(this.posX - 25, this.posY - 27, (this.thirst / 2), 3)
+            this.surface.fillRect(this.posX - 25, this.posY - this.size - 21, (this.thirst / 2), 3)
 
             // MATING
             this.surface.beginPath()
             this.surface.fillStyle = 'rgba(247, 54, 151, 1)'
-            this.surface.fillRect(this.posX - 25, this.posY - 24, (this.matingUrge / 2), 3)
+            this.surface.fillRect(this.posX - 25, this.posY - this.size - 18, (this.matingUrge / 2), 3)
 
             // SICKNESS
             this.surface.beginPath()
             this.surface.fillStyle = 'rgba(64, 255, 54, 1)'
-            this.surface.fillRect(this.posX - 25, this.posY - 21, (this.sickness / 2), 3)
+            this.surface.fillRect(this.posX - 25, this.posY - this.size - 15, (this.sickness / 2), 3)
 
             // STATUS
             this.surface.font = '1rem Arial'
@@ -358,14 +358,14 @@ export default class Person {
     }
 
     findMate() {
-        if (this.matingUrge > 70 && this.MATE == null) {
+        if (this.matingUrge > 50 && this.MATE == null) {
             for (let person of this.population) {
 
                 if (person.gender != this.gender && person.status != 'Mating' && person != this) {
                     let distance = Math.hypot(this.posX - person.posX, this.posY - person.posY)
 
                     if (distance <= this.viewrange + this.size) {
-                        if (person.matingUrge > 70) {
+                        if (person.matingUrge + this.matingUrge > 90) {
                             this.MATE = person
                             person.MATE = this
                         }
