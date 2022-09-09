@@ -12,7 +12,8 @@ export default class Person {
 
         this.type = 'Person'
 
-        this.age = this.father.type == 'Person' ? 0 : Math.floor(Math.random() * (30 - 10) + 10)
+        this.age = this.father.type == 'Person' ? 0 : Math.floor(Math.random() * (30 - 10) + 10) + Math.random()
+        this.prevAge = this.father.type == 'Person' ? 0 : this.age - 1
 
         this.size = (this.settings.width / this.settings.x) * 0.2
         this.adultSize = this.size * 1.2
@@ -448,9 +449,9 @@ export default class Person {
 
     handleAge() {
         // AGE handling
-        this.age += 0.002
+        this.age += 0.004
 
-        if (this.age >= 18) {
+        if (this.age >= 15) {
             this.isAdult = true
         }
 
@@ -458,37 +459,18 @@ export default class Person {
             this.size = this.adultSize
         }
 
-        // DEATH FROM OLD AGE
-        let chanceToDie = Math.random() - (this.sickness / 100000)
+        if (Math.floor(this.age) > this.prevAge) {
+             // DEATH FROM OLD AGE
+            let chanceToDie = Math.random()
+            let formula = (this.age/100) / (100-(this.sickness/5) - this.age)
 
-        if (this.age <= 35) {
-            if (chanceToDie <= (this.age ^ 2) / 2500000) {
-                this.isAlive = false
-            }
-        }
 
-        if (this.age > 35 && this.age <= 60) {
-            if (chanceToDie <= (this.age ^ 2) / 2000000) {
+            if (chanceToDie <= formula) {
                 this.isAlive = false
+                console.log('Died at age:' + this.age)
             }
-        }
-
-        if (this.age > 60 && this.age <= 80) {
-            if (chanceToDie <= (this.age ^ 2) / 120000) {
-                this.isAlive = false
-            }
-        }
-
-        if (this.age > 80 && this.age <= 90) {
-            if (chanceToDie <= (this.age ^ 2) / 400000) {
-                this.isAlive = false
-            }
-        }
-
-        if (this.age > 90) {
-            if (chanceToDie <= (this.age ^ 2) / 120000) {
-                this.isAlive = false
-            }
+    
+            this.prevAge = Math.floor(this.age)
         }
     }
 
