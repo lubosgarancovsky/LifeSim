@@ -197,7 +197,7 @@ export default class Person {
         this.thirst += this.thirstGene / 10
 
         if (this.isAdult)
-            this.matingUrge += this.matingGene / 10
+            this.matingUrge += ((Math.sqrt(this.matingGene) / (this.age/15))) / 10
 
         // boundaries at 100%
         if (this.hunger > 100) {
