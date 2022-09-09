@@ -61,6 +61,8 @@ export default class Person {
         
         this.viewrange = (this.viewrangeGene * this.adultSize * 10) + this.adultSize * 8
 
+        this.atractivity = Math.round((this.viewrangeGene + this.hungerGene + this.thirstGene + this.matingGene + this.healthGene) * 2)
+
 
         // NEEDS
         this.hunger = 0
@@ -129,7 +131,7 @@ export default class Person {
             this.surface.font = '1rem Arial'
             this.surface.fillStyle = 'black'
             this.surface.textAlign = 'center'
-            this.surface.fillText(`${this.status}  ${Math.floor(this.age)}`, this.posX, this.posY + this.size*2 + 10)
+            this.surface.fillText(`${this.atractivity} ${this.status}  ${Math.floor(this.age)}`, this.posX, this.posY + this.size*2 + 10)
         }
 
         // BODY
@@ -198,8 +200,8 @@ export default class Person {
     handleNeeds() {
 
         // Increasing needs after every frame
-        this.hunger += this.hungerGene / 10
-        this.thirst += this.thirstGene / 10
+        this.hunger += (1 - this.hungerGene) / 10
+        this.thirst += (1 - this.thirstGene) / 10
 
         if (this.isAdult)
             this.matingUrge += ((Math.sqrt(this.matingGene) / (this.age/15))) / 10
@@ -243,7 +245,6 @@ export default class Person {
         this.findWater()
         this.goDrink()
 
-        this.findMate()
         this.goMate()
     }
 
@@ -363,57 +364,37 @@ export default class Person {
         }
     }
 
-    findMate() {
-        if (this.matingUrge > 50 && this.MATE == null) {
-            for (let person of this.population) {
-
-                if (person.gender != this.gender && person.status != 'Mating' && person != this) {
-                    let distance = Math.hypot(this.posX - person.posX, this.posY - person.posY)
-
-                    if (distance <= this.viewrange + this.size) {
-                        if (person.matingUrge + this.matingUrge > 90) {
-                            this.MATE = person
-                            person.MATE = this
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     goMate() {
         if (this.MATE) {
             this.destX = this.MATE.posX
             this.destY = this.MATE.posY
 
-            this.MATE.destX = this.posX
-            this.MATE.destY = this.posY
-
             let distance = Math.hypot(this.posX - this.destX, this.posY - this.destY)
 
             this.status = 'Going to mate'
-            this.MATE.status = 'Going to mate'
 
             if (distance < 1) {
                 this.status = 'Mating'
-                this.MATE.status = 'Mating'
 
                 this.isMating = true
-                this.MATE.isMating = true
 
                 this.wait(2000)
-                this.MATE.wait(2000)
 
                 if (this.gender == 'F') {
                     this.getPregnant(this.MATE)
                 } else {
                     this.MATE.getPregnant(this)
                 }
-
-                this.MATE.MATE = null
                 this.MATE = null
             }
         }
+    }
+
+    answearMatingRequest(partner) {
+
+        let modificator = this.matingUrge >= 100 - (this.settings.mating * partner.atractivity) 
+
+        return modificator
     }
 
     getPregnant(father) {
@@ -421,21 +402,17 @@ export default class Person {
 
             let changeToGetPregnant = Math.random()
             let numberOfChildrenChance = Math.random()
-            let numberOfChildren = 0
+            let numberOfChildren = 1
 
-            if (changeToGetPregnant > 0.3) {
+            if (changeToGetPregnant > 0.6) {
                 this.isPregnant = true
 
                 if (numberOfChildrenChance < 0.2) {
-                    numberOfChildren = 3
-                }
-
-                if (numberOfChildrenChance >= 0.2 && numberOfChildrenChance < 0.4) {
                     numberOfChildren = 2
                 }
 
-                if (numberOfChildrenChance >= 0.4) {
-                    numberOfChildren = 1
+                if (numberOfChildrenChance < 0.08) {
+                    numberOfChildren = 3
                 }
 
                 const pregnancyTimer = setTimeout(() => {
@@ -491,13 +468,16 @@ export default class Person {
             for (let person of this.population) {
                 let distance = Math.hypot(this.posX - person.posX, this.posY - person.posY)
 
-                if (distance <= 30) {
-                    person.getSick(10)
+                if (distance <= this.size*5 + this.size) {
+                    person.getSick(40)
                 }
             }
 
+            
+
             let chanceToHeal = Math.random()
-            if (chanceToHeal < 0.001) {
+            console.log(chanceToHeal)
+            if (chanceToHeal < (this.sickness/100000)) {
                 this.isSick = false
                 this.sickness = 0
             }
@@ -507,9 +487,9 @@ export default class Person {
 
     getSick(chance) {
         if (this.age - this.lastGotSick >= 2) {
-            let sickness = Math.random()
+            let chanceToGetSick = Math.random()
 
-            if (sickness < (this.healthGene / 100) * chance) {
+            if (chanceToGetSick < ((this.healthGene * chance) / 100)) {
                 this.isSick = true
                 this.lastGotSick = this.age
             }
@@ -530,6 +510,18 @@ export default class Person {
                 // Ask for last water position
                 if (this.lastWater == null) {
                     this.lastWater = person.lastWater
+                }
+
+                // handle searching for mate
+                if (person.gender != this.gender) {
+                    let result_one = this.answearMatingRequest(person)
+                    let result_two = person.answearMatingRequest(this)
+
+                    if (result_one && result_two) {
+                        this.MATE = person
+                        person.MATE = this
+                    }
+                        
                 }
             }
         }

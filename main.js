@@ -16,8 +16,6 @@ var HEIGHT = canvas.height
 
 var info = new Info(WIDTH, HEIGHT)
 
-//var defaultSize = info.defaultSize()
-
 var settings = info.getSettings()
 
 var terrain = new Terrain(ctx, settings)

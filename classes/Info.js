@@ -19,7 +19,9 @@ export default class Info {
 
         // DEFAULT SETTINGS
         this.foodDensity = document.querySelector('#food').value = 15
-        this.waterDensity = document.querySelector('#water').value = 35
+        this.waterDensity = document.querySelector('#water').value = 40
+
+        this.matingFrequency = document.querySelector('#mating').value = 20
 
         this.viewrange = document.querySelector('#viewrange').checked = false
         this.hud = document.querySelector('#hud').checked = true
@@ -54,6 +56,7 @@ export default class Info {
     getSettings() {
         this.foodDensity = document.querySelector('#food').value
         this.waterDensity = document.querySelector('#water').value
+        this.matingFrequency = document.querySelector('#mating').value
         this.viewrange = document.querySelector('#viewrange').checked
         this.hud = document.querySelector('#hud').checked
         this.destination = document.querySelector('#destination').checked
@@ -65,7 +68,8 @@ export default class Info {
             width: this.WIDTH,
             height: this.HEIGHT,
             food: this.foodDensity / 100,                 
-            water: this.waterDensity / 100,                 
+            water: this.waterDensity / 100,
+            mating: this.matingFrequency / 10,               
             x: this.worldSize,                        
             male: this.maleNum,                  
             female: this.femaleNum,                   
