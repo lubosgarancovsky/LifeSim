@@ -244,7 +244,7 @@ export default class Person {
     findFood() {
 
         // If is hungry but didnt find food yet
-        if (this.hunger > 45 && this.FOOD == null) {
+        if (this.hunger > 50 && this.isEating == false) {
 
             let closestFood = this.data.foodmap[0]
             let minDistance = 10000
@@ -304,7 +304,7 @@ export default class Person {
 
     findWater() {
         // If is thirsty but didnt find water yet
-        if (this.thirst > 45 && this.WATER == null) {
+        if (this.thirst > 50 && this.isDrinking == false) {
 
             let closestWater = this.data.water[0]
             let minDistance = 10000
