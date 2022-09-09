@@ -14,7 +14,7 @@ export default class RandomParent{
 
         // GENES
         this.speed = Math.random() * (1.2 - 0.8) + 0.8
-        this.viewrange = Math.random() * (120 - 50) + 50 
+        this.viewrangeGene = Math.random()
         this.hungerGene = Math.random()
         this.thirstGene = Math.random()
         this.matingGene = Math.random()

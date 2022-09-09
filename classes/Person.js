@@ -49,13 +49,18 @@ export default class Person {
 
         // GENES
         this.speed = (father.speed + mother.speed) / 2
-        this.viewrange = (father.viewrange + mother.viewrange) / 2
-
+       
         // Gene is a number between 0 and 1, higher number => better gene
+        this.viewrangeGene = (father.viewrangeGene + mother.viewrangeGene) / 2
         this.hungerGene = (father.hungerGene + mother.hungerGene) / 2
         this.thirstGene = (father.thirstGene + mother.thirstGene) / 2
         this.matingGene = (father.matingGene + mother.matingGene) / 2
         this.healthGene = (father.healthGene + mother.healthGene) / 2
+
+
+        
+        this.viewrange = (this.viewrangeGene * this.adultSize * 10) + this.adultSize * 8
+
 
         // NEEDS
         this.hunger = 0
