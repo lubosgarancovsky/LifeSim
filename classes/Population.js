@@ -46,7 +46,6 @@ export default class Population {
     addMale() {
         const randomParent = new RandomParent(this.settings, this.data)
         this.population.push(new Person('M', this.settings, this.surface, randomParent, randomParent, this.data, this.population))
-        console.log('Male created')
     }
 
     addFemale() {

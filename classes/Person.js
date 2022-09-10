@@ -293,14 +293,17 @@ export default class Person {
 
             if (distance < 1) {
                 this.lastFood = this.FOOD
+
+                this.isEating = true
+                this.status = 'Eating'
+
                 this.FOOD.getEaten()
                 this.FOOD = null
-                this.isEating = true
+                this.getSick(2)
 
-                this.status = 'Eating'
                 this.wait(2000)
 
-                this.getSick(2)
+
             }
         }
 
@@ -357,15 +360,23 @@ export default class Person {
                 this.WATER = null
                 this.isDrinking = true
                 this.status = 'Drinking'
-                this.wait(2000)
 
                 this.getSick(3)
+                this.wait(2000)
+
+
             }
         }
     }
 
     goMate() {
         if (this.MATE) {
+            // if partner died on the way, it removes him as mate
+            if(!this.MATE.isAlive) {
+                this.MATE = null
+                return
+            }
+
             this.destX = this.MATE.posX
             this.destY = this.MATE.posY
 
@@ -378,22 +389,20 @@ export default class Person {
 
                 this.isMating = true
 
-                this.wait(2000)
-
                 if (this.gender == 'F') {
                     this.getPregnant(this.MATE)
                 } else {
                     this.MATE.getPregnant(this)
                 }
+
                 this.MATE = null
+                this.wait(2000)
             }
         }
     }
 
     answearMatingRequest(partner) {
-
         let modificator = this.matingUrge >= 100 - (this.settings.mating * partner.atractivity) 
-
         return modificator
     }
 
@@ -404,7 +413,7 @@ export default class Person {
             let numberOfChildrenChance = Math.random()
             let numberOfChildren = 1
 
-            if (changeToGetPregnant > 0.6) {
+            if (changeToGetPregnant > 0.3) {
                 this.isPregnant = true
 
                 if (numberOfChildrenChance < 0.2) {
@@ -422,6 +431,7 @@ export default class Person {
 
                         this.CHILDREN.push(new Person(gender, this.settings, this.surface, father, this, this.data, this.population))
                     }
+
                     this.isPregnant = false
                     clearTimeout(pregnancyTimer)
                 }, this.settings.pregnancyDuration)
@@ -449,7 +459,6 @@ export default class Person {
 
             if (chanceToDie <= formula) {
                 this.isAlive = false
-                console.log('Died at age:' + this.age)
             }
     
             this.prevAge = Math.floor(this.age)
@@ -476,7 +485,6 @@ export default class Person {
             
 
             let chanceToHeal = Math.random()
-            console.log(chanceToHeal)
             if (chanceToHeal < (this.sickness/100000)) {
                 this.isSick = false
                 this.sickness = 0
@@ -520,8 +528,7 @@ export default class Person {
                     if (result_one && result_two) {
                         this.MATE = person
                         person.MATE = this
-                    }
-                        
+                    }  
                 }
             }
         }
