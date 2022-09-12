@@ -53,13 +53,11 @@ export default class Person {
         this.speed = (father.speed + mother.speed) / 2
        
         // Gene is a number between 0 and 1, higher number => better gene
-        this.viewrangeGene = (father.viewrangeGene + mother.viewrangeGene) / 2
-        this.hungerGene = (father.hungerGene + mother.hungerGene) / 2
-        this.thirstGene = (father.thirstGene + mother.thirstGene) / 2
-        this.matingGene = (father.matingGene + mother.matingGene) / 2
-        this.healthGene = (father.healthGene + mother.healthGene) / 2
-
-
+        this.viewrangeGene = Utils.clamp(((father.viewrangeGene + mother.viewrangeGene) / 2) + Utils.randomize(-0.2, 0.5))
+        this.hungerGene = Utils.clamp(((father.hungerGene + mother.hungerGene) / 2) + Utils.randomize(-0.2, 0.5))
+        this.thirstGene = Utils.clamp(((father.thirstGene + mother.thirstGene) / 2) + Utils.randomize(-0.2, 0.5))
+        this.matingGene = Utils.clamp(((father.matingGene + mother.matingGene) / 2) + Utils.randomize(-0.2, 0.5))
+        this.healthGene = Utils.clamp(((father.healthGene + mother.healthGene) / 2) + Utils.randomize(-0.2, 0.5))
         
         this.viewrange = (this.viewrangeGene * this.adultSize * 10) + this.adultSize * 8
 
