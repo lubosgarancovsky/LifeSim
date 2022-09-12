@@ -1,4 +1,6 @@
 
+import { Utils} from "./Utils"
+
 export default class RandomParent{
     constructor(settings, data) {
         this.settings = settings
@@ -13,12 +15,12 @@ export default class RandomParent{
 
 
         // GENES
-        this.speed = Math.random() * (1.2 - 0.8) + 0.8
-        this.viewrangeGene = Math.random()
-        this.hungerGene = Math.random()
-        this.thirstGene = Math.random()
-        this.matingGene = Math.random()
-        this.healthGene = Math.random()
+        this.speed = Utils.randomize(0.8, 1.2)
+        this.viewrangeGene = Utils.randomize()
+        this.hungerGene = Utils.randomize()
+        this.thirstGene = Utils.randomize()
+        this.matingGene = Utils.randomize()
+        this.healthGene = Utils.randomize()
     }
 
     createSpawnPositions() {

@@ -1,3 +1,5 @@
+import { Utils } from "./Utils"
+
 export default class Person {
     constructor(gender, settings, surface, father, mother, data, population) {
 
@@ -78,6 +80,8 @@ export default class Person {
 
         this.lastFood = null
         this.lastWater = null
+
+        this.timer = null
 
     }
 
@@ -321,7 +325,12 @@ export default class Person {
 
             // Iterates through all water cells and finds the closest one within viewrange
             for (let item of this.data.water) {
-                let distance = Math.hypot(this.posX - item.posX, this.posY - item.posY)
+                let topLeft = Math.hypot(this.posX - item.posX, this.posY - item.posY)
+                let topRight = Math.hypot(this.posX - item.posX + item.size, this.posY - item.posY)
+                let bottomLeft = Math.hypot(this.posX - item.posX, this.posY - item.posY + item.size)
+                let bottomRight = Math.hypot(this.posX - item.posX  + item.size, this.posY - item.posY  + item.size) 
+
+                let distance = Utils.min([topLeft, topRight, bottomLeft, bottomRight]) 
 
                 if (distance < minDistance) {
                     minDistance = distance
@@ -536,12 +545,17 @@ export default class Person {
 
     wait(time) {
         this.isWaiting = true
-        const timer = setTimeout(() => {
+        this.timer = setTimeout(() => {
             this.isWaiting = false
             this.isMating = false
             this.isEating = false
             this.isDrinking = false
             clearTimeout(timer)
+            this.timer = null
         }, time)
+
+        return () => {
+            clearTimeout(this.timer)
+        }
     }
 }
