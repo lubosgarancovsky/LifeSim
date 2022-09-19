@@ -51,14 +51,14 @@ export default class Person {
 
         // GENES
         this.speed = (father.speed + mother.speed) / 2
-       
+
         // Gene is a number between 0 and 1, higher number => better gene
         this.viewrangeGene = Utils.clamp(((father.viewrangeGene + mother.viewrangeGene) / 2) + Utils.randomize(-0.2, 0.5))
         this.hungerGene = Utils.clamp(((father.hungerGene + mother.hungerGene) / 2) + Utils.randomize(-0.2, 0.5))
         this.thirstGene = Utils.clamp(((father.thirstGene + mother.thirstGene) / 2) + Utils.randomize(-0.2, 0.5))
         this.matingGene = Utils.clamp(((father.matingGene + mother.matingGene) / 2) + Utils.randomize(-0.2, 0.5))
         this.healthGene = Utils.clamp(((father.healthGene + mother.healthGene) / 2) + Utils.randomize(-0.2, 0.5))
-        
+
         this.viewrange = (this.viewrangeGene * this.adultSize * 10) + this.adultSize * 8
 
         this.atractivity = Math.round((this.viewrangeGene + this.hungerGene + this.thirstGene + this.matingGene + this.healthGene) * 2)
@@ -134,7 +134,7 @@ export default class Person {
             this.surface.font = '1rem Arial'
             this.surface.fillStyle = 'black'
             this.surface.textAlign = 'center'
-            this.surface.fillText(`${this.atractivity} ${this.status}  ${Math.floor(this.age)}`, this.posX, this.posY + this.size*2 + 10)
+            this.surface.fillText(`${this.atractivity} ${this.status}  ${Math.floor(this.age)}`, this.posX, this.posY + this.size * 2 + 10)
         }
 
         // BODY
@@ -208,7 +208,7 @@ export default class Person {
         this.thirst += (1 - this.thirstGene) / 10
 
         if (this.isAdult)
-            this.matingUrge += ((Math.sqrt(this.matingGene) / (this.age/15))) / 10
+            this.matingUrge += ((Math.sqrt(this.matingGene) / (this.age / 15))) / 10
 
         // boundaries at 100%
         if (this.hunger > 100) {
@@ -229,17 +229,17 @@ export default class Person {
         if (this.thirst < 0) this.thirst = 0
         if (this.matingUrge < 0) this.matingUrge = 0
 
-            if (this.isEating) {
-                this.hunger -= 1
-            }
+        if (this.isEating) {
+            this.hunger -= 1
+        }
 
-            if (this.isDrinking) {
-                this.thirst -= 1
-            }
+        if (this.isDrinking) {
+            this.thirst -= 1
+        }
 
-            if (this.isMating) {
-                this.matingUrge -= 0.7
-            }
+        if (this.isMating) {
+            this.matingUrge -= 0.7
+        }
 
 
 
@@ -330,9 +330,9 @@ export default class Person {
                 let topLeft = Math.hypot(this.posX - item.posX, this.posY - item.posY)
                 let topRight = Math.hypot(this.posX - item.posX + item.size, this.posY - item.posY)
                 let bottomLeft = Math.hypot(this.posX - item.posX, this.posY - item.posY + item.size)
-                let bottomRight = Math.hypot(this.posX - item.posX  + item.size, this.posY - item.posY  + item.size) 
+                let bottomRight = Math.hypot(this.posX - item.posX + item.size, this.posY - item.posY + item.size)
 
-                let distance = Utils.min([topLeft, topRight, bottomLeft, bottomRight]) 
+                let distance = Utils.min([topLeft, topRight, bottomLeft, bottomRight])
 
                 if (distance < minDistance) {
                     minDistance = distance
@@ -346,9 +346,9 @@ export default class Person {
                 return
             }
         }
-        
-        if(this.thirst >= 70 && this.WATER == null) {
-            if(this.lastWater != null) {
+
+        if (this.thirst >= 70 && this.WATER == null) {
+            if (this.lastWater != null) {
                 this.WATER = this.lastWater
             }
         }
@@ -383,7 +383,7 @@ export default class Person {
     goMate() {
         if (this.MATE && !this.isMating) {
             // if partner died on the way, it removes him as mate
-            if(!this.MATE.isAlive) {
+            if (!this.MATE.isAlive) {
                 this.MATE = null
                 return
             }
@@ -399,18 +399,18 @@ export default class Person {
                 this.status = 'Mating'
                 this.isMating = true
 
-                
+
                 if (this.gender == 'F') {
                     this.getPregnant(this.MATE)
                 }
-                
+
                 this.wait(2000)
             }
         }
     }
 
     answearMatingRequest(partner) {
-        let modificator = this.matingUrge >= 100 - (this.settings.mating * partner.atractivity) 
+        let modificator = this.matingUrge >= 100 - (this.settings.mating * partner.atractivity)
         return modificator
     }
 
@@ -432,7 +432,7 @@ export default class Person {
                     numberOfChildren = 3
                 }
 
-                 this.pregnancyTimer = setTimeout(() => {
+                this.pregnancyTimer = setTimeout(() => {
                     for (let i = 0; i < numberOfChildren; i++) {
                         let childGenderChance = Math.random()
                         let gender = childGenderChance >= 0.5 ? 'M' : 'F'
@@ -464,15 +464,15 @@ export default class Person {
         }
 
         if (Math.floor(this.age) > this.prevAge) {
-             // DEATH FROM OLD AGE
+            // DEATH FROM OLD AGE
             let chanceToDie = Math.random()
-            let formula = (this.age/100) / (100-(this.sickness/5) - this.age)
+            let formula = (this.age / 100) / (100 - (this.sickness / 5) - this.age)
 
 
             if (chanceToDie <= formula) {
                 this.isAlive = false
             }
-    
+
             this.prevAge = Math.floor(this.age)
         }
     }
@@ -486,17 +486,17 @@ export default class Person {
                 this.isAlive = false
             }
 
-            for (let i = 0, size = this.population.size; i < size; i++){
+            for (let i = 0, size = this.population.size; i < size; i++) {
                 let person = this.population[i]
                 let distance = Math.hypot(this.posX - person.posX, this.posY - person.posY)
 
-                if (distance <= this.size*5 + this.size) {
+                if (distance <= this.size * 5 + this.size) {
                     person.getSick(40)
                 }
             }
 
             let chanceToHeal = Math.random()
-            if (chanceToHeal < (this.sickness/100000)) {
+            if (chanceToHeal < (this.sickness / 100000)) {
                 this.isSick = false
                 this.sickness = 0
             }
@@ -516,32 +516,37 @@ export default class Person {
     }
 
     communicate() {
-        for (let i = 0, size = this.population.size; i < size; i++){
+        for (let i = 0, size = this.population.length; i < size; i++){
             let person = this.population[i]
-            let distance = Math.hypot(this.posX - person.posX, this.posY - person.posY)
 
-            if (distance <= this.viewrange + this.size) {
+            // Person doesnt have to communicate with itself
+            if (this != person) {
+                let distance = Math.hypot(this.posX - person.posX, this.posY - person.posY)
 
-                // Ask for last food position
-                if (this.lastFood == null) {
-                    this.lastFood = person.lastFood
+                if (distance <= this.viewrange + this.size) {
+
+                    // Ask for last food position
+                    if (this.lastFood == null) {
+                        this.lastFood = person.lastFood
+                    }
+
+                    // Ask for last water position
+                    if (this.lastWater == null) {
+                        this.lastWater = person.lastWater
+                    }
+
+                    // handle searching for mate
+                    if (person.gender != this.gender) {
+                        let result_one = this.answearMatingRequest(person) && this.MATE == null
+                        let result_two = person.answearMatingRequest(this) && person.MATE == null
+
+                        if (result_one && result_two) {
+                            this.MATE = person
+                            person.MATE = this
+                        }
+                    }
                 }
 
-                // Ask for last water position
-                if (this.lastWater == null) {
-                    this.lastWater = person.lastWater
-                }
-
-                // handle searching for mate
-                if (person.gender != this.gender) {
-                    let result_one = this.answearMatingRequest(person) && this.MATE == null
-                    let result_two = person.answearMatingRequest(this) && person.MATE == null
-
-                    if (result_one && result_two) {
-                        this.MATE = person
-                        person.MATE = this
-                    }  
-                }
             }
         }
     }

@@ -17,7 +17,8 @@ export default class FoodMap {
     createFood() {
         var density = this.settings.food
 
-        for (let tile of this.GRID) {
+        for (let i = 0, size = this.GRID.length; i < size; i++){
+            let tile = this.GRID[i]
             var randomNumber = Math.random()
             if (tile.type === 'ground' && randomNumber < density) {
                 let x = tile.posX + Math.round(tile.size/2)
@@ -29,7 +30,7 @@ export default class FoodMap {
 
     update() {
         for (let i = 0; i < this.FOOD.length; i++) {
-            this.FOOD[0].update()
+            this.FOOD[i].update()
         }
     }
 }
