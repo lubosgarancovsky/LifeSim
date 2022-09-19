@@ -6,7 +6,8 @@ export class Utils {
     static min(array) {
         let min = array[0]
 
-        for (let number of array) {
+        for (let i = 0, size = array.length; i < size; i++) {
+            let number = array[i]
             if (number < min) {
                 min = number
             }

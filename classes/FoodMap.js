@@ -28,6 +28,8 @@ export default class FoodMap {
     }
 
     update() {
-        this.FOOD.forEach((food) => food.update())
+        for (let i = 0; i < this.FOOD.length; i++) {
+            this.FOOD[0].update()
+        }
     }
 }

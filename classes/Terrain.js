@@ -39,7 +39,9 @@ export default class Terrain {
     }
 
     update() {
-        this.GRID.forEach((tile) => tile.draw())
+        for (let i = 0, size = this.GRID.length; i < size; i++) {
+            this.GRID[i].draw()
+        }
     }
 }
 

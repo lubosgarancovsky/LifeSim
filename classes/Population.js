@@ -20,14 +20,15 @@ export default class Population {
 
         this.population = this.population.filter((person) => person.isAlive)
 
-        this.population.forEach((person) => {
+        for (let i = 0, size = this.population.length; i < size; i++) {
+            let person = this.population[i]
             person.update()
             if (person.CHILDREN.length > 0) {
                 this.population = this.population.concat(person.CHILDREN)
                 person.CHILDREN = []
                 person.isPregnant = false
             }
-        })
+        }
         return this.population
     }
 
