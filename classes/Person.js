@@ -154,7 +154,7 @@ export default class Person {
 
     move() {
         if (!this.isWaiting) {
-            var distance = +Math.hypot(this.posX - this.destX, this.posY - this.destY)
+            var distance = Math.hypot(this.posX - this.destX, this.posY - this.destY)
             var radians = Math.atan2(this.destY - this.posY, this.destX - this.posX)
 
             var dx = Math.cos(radians) * this.speed

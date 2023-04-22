@@ -1,5 +1,5 @@
 {
-  "homepage" : "https://lubosgarancovsky.github.io/LifeSim",
+  "homepage": "https://lubosgarancovsky.github.io/LifeSim",
   "name": "lifesim3",
   "private": true,
   "version": "0.0.0",
@@ -13,6 +13,7 @@
     "vite": "^3.1.0"
   },
   "dependencies": {
-    "perlin-noise-3d": "^0.5.4"
+    "perlin-noise-3d": "^0.5.4",
+    "typescript": "^5.0.2"
   }
 }
