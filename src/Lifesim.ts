@@ -5,9 +5,8 @@ import Settings from "./Settings";
 import ResourceController from "./Resources/ResourceController";
 import PopulationController from "./Human/PopulationController";
 import UI from "./UI/UI";
-import TerraintType from "./Terrain/TerrainType";
-import Color from "./UI/Color";
 import Human from "./Human/Human";
+import { Vector2 } from "./Vector/Vector2";
 
 class Lifesim {
   private isRunning: boolean;
@@ -23,15 +22,8 @@ class Lifesim {
   private populationController: PopulationController;
   private UIController: UI;
 
-  // settings
-  private debug = {
-    viewRange: false,
-    path: false,
-    resources: false,
-  };
-
   constructor() {
-    this.tileSize = Settings.TILE_SIZE;
+    this.tileSize = Settings.settings.world.tileSize;
     this.isRunning = false;
     this.lastTime = 0;
     this.update = this.update.bind(this);
@@ -66,7 +58,10 @@ class Lifesim {
       this.resourceController,
       this.UIController
     );
-    this.populationController.init(1, 1);
+    this.populationController.init(
+      Settings.settings.game.males,
+      Settings.settings.game.females
+    );
   }
 
   run() {
@@ -86,26 +81,26 @@ class Lifesim {
 
     // Update game state here...
     this.drawTerrain();
-    this.drawResources();
+    this.drawFood();
     this.drawHumans();
-    this.updateResources();
+    this.updateResources(deltaTime);
 
     this.populationController.update(deltaTime);
 
     requestAnimationFrame(this.update);
   }
 
-  updateResources() {
-    const resources = this.resourceController.resources;
-    const size = this.resourceController.resources.length;
+  updateResources(deltaTime) {
+    const resources = this.resourceController.food;
+    const size = this.resourceController.food.length;
 
     for (let i = 0; i < size; i++) {
-      resources[i].update();
+      resources[i].update(deltaTime);
     }
   }
 
-  drawRect(rect: Rect) {
-    this.ctx.lineWidth = 0.5;
+  drawRect(rect: Rect, lineWidth = 0.5) {
+    this.ctx.lineWidth = lineWidth;
     this.ctx.fillStyle = rect.fillStyle;
     this.ctx.fillRect(
       rect.position.x,
@@ -125,9 +120,9 @@ class Lifesim {
     }
   }
 
-  drawCircle(circle: Circle) {
+  drawCircle(circle: Circle, lineWidth = 0.5) {
     this.ctx.beginPath();
-    this.ctx.lineWidth = 0.5;
+    this.ctx.lineWidth = lineWidth;
     this.ctx.fillStyle = circle.fillStyle;
     this.ctx.arc(
       circle.position.x,
@@ -163,31 +158,23 @@ class Lifesim {
     }
   }
 
-  drawResources() {
-    const meshes = this.resourceController.meshes;
-    const size = this.resourceController.meshes.length;
-    const resources = this.resourceController.resources;
+  drawFood() {
+    const food = this.resourceController.food;
+    const size = this.resourceController.food.length;
 
-    for (let i = 0; i < resources.length; i++) {
-      if (resources[i].isBeingGathered) {
+    for (let i = 0; i < size; i++) {
+      if (Settings.settings.debug.resourceAmount) {
         this.ctx.fillStyle = "rgb(0,0,0)";
         this.ctx.fillText(
-          resources[i].getAmount().toFixed(0).toString(),
-          resources[i].getParent().position.x,
-          resources[i].getParent().position.y
+          food[i].getAmount().toFixed(0).toString(),
+          food[i].getParent().position.x,
+          food[i].getParent().position.y
         );
       }
     }
 
     for (let i = 0; i < size; i++) {
-      const mesh = meshes[i];
-      if (mesh.type === "rect") {
-        this.drawRect(mesh.mesh);
-      }
-
-      if (mesh.type === "circle") {
-        this.drawCircle(mesh.mesh);
-      }
+      this.drawCircle(food[i]);
     }
   }
 
@@ -196,55 +183,91 @@ class Lifesim {
     const humans = this.populationController.population;
 
     for (let i = 0; i < size; i++) {
+      const human = humans[i];
       // Debug mode drawing
 
       // ViewRange
-      if (this.debug.viewRange) {
-        const subgrid = humans[i].inViewSubgrid;
+      if (Settings.settings.debug.viewRange) {
+        const subgrid = human.inViewSubgrid;
 
         if (!!subgrid) {
-          for (let i = 0; i < subgrid.length; i++) {
+          const viewRangeSize =
+            Settings.settings.world.tileSize * (human.viewrange * 2 + 1);
+          const viewRange = new Rect()
+            .setPosition(subgrid[0].position)
+            .setSize(new Vector2(viewRangeSize, viewRangeSize))
+            .setFillStyle("rgba(0, 0, 0, 0)")
+            .setStrokeStyle("rgb(255, 255, 255)");
+          this.drawRect(viewRange);
+        }
+      }
+
+      // Current path
+      if (Settings.settings.debug.path) {
+        const path = human.path;
+        if (!!path) {
+          for (let i = 0; i < path.length; i++) {
             this.drawRect(
-              subgrid[i].copy().setFillStyle("rgba(255,255,255, 0.5)")
+              path[i]
+                .copy()
+                .setStrokeStyle("rgba(255, 50, 50)")
+                .setFillStyle("rgba(255,50,50,0.2)")
             );
           }
         }
       }
 
-      // Current path
-      if (this.debug.path) {
-        const path = humans[i].path;
-        if (!!path) {
-          for (let i = 0; i < path.length; i++) {
-            this.drawRect(path[i].copy().setFillStyle("rgba(255, 50, 50)"));
-          }
-        }
-      }
-
       // Visible resources
-      if (this.debug.resources) {
-        const resources = humans[i].getVisibleResources();
+      if (Settings.settings.debug.resources) {
+        const resources = human.getVisibleResources();
         if (!!resources) {
           for (let i = 0; i < resources.length; i++) {
             this.drawRect(
               resources[i]
                 .getParent()
                 .copy()
-                .setFillStyle("rgba(0, 50, 255, 0.5)")
+                .setStrokeStyle("rgba(252, 111, 3, 1)")
+                .setFillStyle("rgba(0, 0, 0, 0)"),
+              1
             );
           }
         }
       }
 
-      this.drawProgressBar(humans[i]);
-      this.drawCircle(humans[i]);
+      if (Settings.settings.debug.resourceItem && humans[i].foundWaterObject) {
+        this.drawRect(
+          new Rect()
+            .setPosition(human.foundWaterObject!.position)
+            .setSize(human.foundWaterObject!.size)
+            .setFillStyle("rgba(0, 0, 0, 0)")
+            .setStrokeStyle("rgba(79, 234, 255)"),
+          1
+        );
+
+        const neighbour = human.foundWaterObject!.getFirstWalkableNeighbour(
+          this.terrainController.terrain,
+          this.terrainController.WIDTH,
+          this.terrainController.HEIGHT
+        );
+
+        this.drawRect(
+          new Rect()
+            .setPosition(neighbour?.position!)
+            .setSize(neighbour?.size!)
+            .setFillStyle("rgba(0, 0, 0, 0)")
+            .setStrokeStyle("rgba(0, 0, 0, 1)")
+        );
+      }
+
+      this.drawProgressBar(human);
+      this.drawCircle(human);
     }
   }
 
   drawProgressBar(human: Human) {
     if (human.progressBar > 0) {
       this.ctx.beginPath();
-      this.ctx.fillStyle = "rgb(0, 0, 0, 0.4)";
+      this.ctx.fillStyle = Settings.settings.colors.progressbarBG;
       this.ctx.fillRect(
         human.position.x - human.radius * 1.5,
         human.position.y - human.radius * 2,
@@ -253,7 +276,7 @@ class Lifesim {
       );
 
       this.ctx.beginPath();
-      this.ctx.fillStyle = "rgb(0, 0, 0)";
+      this.ctx.fillStyle = Settings.settings.colors.progressbarFG;
       this.ctx.fillRect(
         human.position.x - human.radius * 1.5,
         human.position.y - human.radius * 2,

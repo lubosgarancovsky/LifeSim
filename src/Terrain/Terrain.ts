@@ -3,9 +3,6 @@ import { Vector2 } from "../Vector/Vector2";
 import perlinNoise3d from "perlin-noise-3d";
 import TerraintType from "./TerrainType";
 import Settings from "../Settings";
-import Resource from "../Resources/Resource";
-import ResourceType from "../Resources/ResourceType";
-import { randChoice } from "../../utils/math";
 
 class Terrain {
   terrain: Tile[] = [];
@@ -30,7 +27,7 @@ class Terrain {
         const tile = new Tile(x, y, this.TILE_SIZE);
         tile.setSize(new Vector2(this.TILE_SIZE, this.TILE_SIZE));
 
-        if (noise > Settings.WATER_DENSITY) {
+        if (noise > Settings.settings.world.waterDensity) {
           tile.setTerrainType(TerraintType.GRASS);
           this.ground.push(tile);
         } else {
@@ -101,7 +98,6 @@ class Terrain {
         // Check if tempX is within the boundaries of the grid
         if (
           tempX &&
-          !(tempX.type === TerraintType.WATER) &&
           Math.abs(
             ((startIndex + x) % this.WIDTH) - (tileIndex % this.WIDTH)
           ) <= viewrange
@@ -113,19 +109,6 @@ class Terrain {
     }
 
     return subgrid;
-  }
-
-  // TEST
-  showTestTile(x = 0, y = 0) {
-    const testTile = this.getTileByPosition(x, y);
-
-    if (testTile) {
-      testTile.fillStyle = "rgba(255, 0, 0, 1)";
-
-      for (let i = 0; i < testTile.neighbours.length; i++) {
-        testTile.neighbours[i].fillStyle = "rgba(186, 91, 180, 1)";
-      }
-    }
   }
 }
 

@@ -31,6 +31,7 @@ class PopulationController {
           this.UIController,
           this.terrainController,
           this.resourceController,
+          this,
         ).setPosition(Vector2.copy(randChoice(this.terrainController.ground).position))
       );
     }
@@ -42,6 +43,7 @@ class PopulationController {
           this.UIController,
           this.terrainController,
           this.resourceController,
+          this,
         ).setPosition(Vector2.copy(randChoice(this.terrainController.ground).position))
       );
     }

@@ -1,18 +1,19 @@
-import { heuristic, randChoice } from "../../utils/math";
+import { heuristic, lerp, randChoice } from "../../utils/math";
 import { randomFemale, randomId, randomMale } from "../../utils/population";
 import Circle from "../Geometry/Circle";
 import ResourceController from "../Resources/ResourceController";
 import Settings from "../Settings";
 import Terrain from "../Terrain/Terrain";
 import Tile from "../Terrain/Tile";
-import Color from "../UI/Color";
 import UI from "../UI/UI";
 import { Vector2 } from "../Vector/Vector2";
 import Gender from "./Gender";
 import Inventory from "./Inventory/Inventory";
-import Resource from "../Resources/Resource";
+import Resource from "../Resources/Food";
 import { HumanDecisionTree } from "./DecisionTree/DecisionTree";
-import ResourceType from "../Resources/ResourceType";
+import Food from "../Resources/Food";
+import TerraintType from "../Terrain/TerrainType";
+import PopulationController from "./PopulationController";
 
 class Human extends Circle {
   name: string;
@@ -21,6 +22,7 @@ class Human extends Circle {
   UIController: UI;
   terrainController: Terrain;
   resourceController: ResourceController;
+  populationController: PopulationController;
 
   viewrange: number = 4;
   inViewSubgrid: Tile[] | null = null;
@@ -36,9 +38,14 @@ class Human extends Circle {
   decisionTree: HumanDecisionTree;
 
   // Needs
-  hunger: number;
-  foundResource: Resource | null = null;
-  //visibleResoures: Resource[] = [];
+  hunger: number = 0;
+  foundFoodObject: Food | null = null;
+
+  thirst: number = 0;
+  foundWaterObject: Tile | null = null;
+
+  matingUrge: number = 0;
+  foundMate: Human | null = null;
 
   // Actions
   isEating: boolean = false;
@@ -50,7 +57,8 @@ class Human extends Circle {
     gender: Gender,
     UIController: UI,
     terrainController: Terrain,
-    resourceController: ResourceController
+    resourceController: ResourceController,
+    populationController: PopulationController
   ) {
     super();
 
@@ -59,24 +67,23 @@ class Human extends Circle {
     this.UIController = UIController;
     this.terrainController = terrainController;
     this.resourceController = resourceController;
+    this.populationController = populationController;
 
     this.gender = gender;
     this.position = new Vector2(250, 250);
-    this.radius = Settings.TILE_SIZE * 0.25;
-    this.fillStyle = Color.HUMAN;
+    this.radius = Settings.settings.world.tileSize * 0.25;
+    this.fillStyle = Settings.settings.colors.human;
     this.inventory = new Inventory();
 
     this.id = randomId();
 
     if (gender === Gender.MALE) {
-      this.strokeStyle = "#0062ff";
+      this.strokeStyle = Settings.settings.colors.maleStroke;
       this.name = randomMale();
     } else {
-      this.strokeStyle = "#ff05e6";
+      this.strokeStyle = Settings.settings.colors.femaleStroke;
       this.name = randomFemale();
     }
-
-    this.hunger = 0;
 
     this.notifyUI(1);
     this.state = "Wandering";
@@ -87,16 +94,39 @@ class Human extends Circle {
 
     this.deltaTime = deltaTime;
 
-    //this.move();
-
     this.decisionTree.evaluate(this);
 
-    this.hunger += 0.05;
+    this.handleNeedsIncrement(deltaTime);
+  }
 
-    //this.visibleResoures = this.getVisibleResources();
+  handleNeedsIncrement(deltaTime) {
+    this.hunger += 1 * deltaTime;
+    this.thirst += 1.5 * deltaTime;
+    this.matingUrge += 20 * deltaTime;
 
-    //this.state.update();
-    //this.drawpath();
+    if (this.hunger < 0) {
+      this.hunger = 0;
+    }
+
+    if (this.thirst < 0) {
+      this.thirst = 0;
+    }
+
+    if (this.matingUrge < 0) {
+      this.matingUrge = 0;
+    }
+
+    if (this.hunger > 100) {
+      this.hunger = 100;
+    }
+
+    if (this.thirst > 100) {
+      this.thirst = 100;
+    }
+
+    if (this.matingUrge > 100) {
+      this.matingUrge = 100;
+    }
   }
 
   move() {
@@ -274,8 +304,7 @@ class Human extends Circle {
 
   findFoodResource() {
     const visibleResources = this.getVisibleResources().filter(
-      (resource) =>
-        resource.getType() === ResourceType.FOOD && resource.getAmount() > 0
+      (resource) => resource.getAmount() > 0
     );
 
     if (visibleResources.length) {
@@ -296,7 +325,7 @@ class Human extends Circle {
         }
       }
 
-      this.foundResource = closestFood;
+      this.foundFoodObject = closestFood;
       this.findPath(closestFood.getParent());
       return closestFood;
     }
@@ -306,13 +335,13 @@ class Human extends Circle {
 
   handleEating() {
     const stopEating = () => {
-      if (this.foundResource) {
-        this.foundResource.isBeingGathered = false;
+      if (this.foundFoodObject) {
+        this.foundFoodObject.isBeingGathered = false;
       }
-      this.hunger = 0;
+
       this.isEating = false;
       this.state = "Wandering";
-      this.foundResource = null;
+      this.foundFoodObject = null;
       this.progressBar = 0;
     };
 
@@ -324,19 +353,14 @@ class Human extends Circle {
       this.progressBar = 100 - this.hunger;
     }
 
-    if (
-      this.foundResource &&
-      this.foundResource.getType() === ResourceType.FOOD
-    ) {
-      this.hunger -= this.foundResource.gather(amountToEat);
+    if (this.foundFoodObject) {
+      this.hunger -= this.foundFoodObject.gather(amountToEat);
       this.progressBar = 100 - this.hunger;
-      this.foundResource.isBeingGathered = true;
+      this.foundFoodObject.isBeingGathered = true;
 
-      if (this.foundResource.getAmount() <= 0) {
+      if (this.foundFoodObject.getAmount() <= 0) {
         stopEating();
       }
-    } else {
-      stopEating();
     }
 
     if (this.inventory.food < 0) {
@@ -347,6 +371,249 @@ class Human extends Circle {
     if (this.progressBar >= 100) {
       stopEating();
     }
+  }
+
+  findWaterResource() {
+    if (!!this.inViewSubgrid?.length) {
+      const grid = this.inViewSubgrid;
+      const water: Tile[] = [];
+
+      for (let i = 0; i < grid.length; i++) {
+        if (grid[i].type === TerraintType.WATER) {
+          water.push(grid[i]);
+        }
+      }
+
+      if (!!water.length) {
+        let minDistance = Vector2.distance(this.position, water[0].getCenter());
+        let closestWater = water[0];
+
+        for (let i = 0; i < water.length; i++) {
+          const distance = Vector2.distance(
+            this.position,
+            water[i].getCenter()
+          );
+
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestWater = water[i];
+          }
+        }
+
+        // finds path to the closest grass tile
+
+        const firstWalkableNeighbour = closestWater.getFirstWalkableNeighbour(
+          this.terrainController.terrain,
+          this.terrainController.WIDTH,
+          this.terrainController.HEIGHT
+        );
+
+        if (!!firstWalkableNeighbour) {
+          this.foundWaterObject = closestWater;
+          this.findPath(firstWalkableNeighbour);
+          return closestWater;
+        }
+
+        return null;
+      }
+
+      return null;
+    }
+
+    return null;
+  }
+
+  handleDrinking() {
+    const stopDrinking = () => {
+      this.isDrinking = false;
+      this.state = "Wandering";
+      this.foundWaterObject = null;
+      this.progressBar = 0;
+    };
+
+    const amountToDrink = 50 * this.deltaTime;
+
+    if (this.inventory.water > 0) {
+      this.thirst -= amountToDrink;
+      this.inventory.removeWater(amountToDrink);
+      this.progressBar = 100 - this.thirst;
+    }
+
+    if (this.foundWaterObject) {
+      this.thirst -= amountToDrink;
+      this.progressBar = 100 - this.thirst;
+    }
+
+    if (this.inventory.water < 0) {
+      this.inventory.water = 0;
+      stopDrinking();
+    }
+
+    if (this.progressBar >= 100) {
+      stopDrinking();
+    }
+  }
+
+  collectFood() {
+    const stopCollecting = () => {
+      this.isCollecting = false;
+      this.state = "Wandering";
+      this.foundFoodObject = null;
+      this.progressBar = 0;
+      this.move();
+    };
+
+    const amountToCollect = 20 * this.deltaTime;
+
+    if (this.foundFoodObject) {
+      this.inventory.addFood(this.foundFoodObject.gather(amountToCollect));
+      this.progressBar =
+        (this.inventory.food / Settings.settings.game.foodInventoryLimit) * 100;
+    } else {
+      stopCollecting();
+    }
+
+    if (
+      this.progressBar >= 100 ||
+      this.inventory.food >= Settings.settings.game.foodInventoryLimit ||
+      !this.foundFoodObject ||
+      this.foundFoodObject.getAmount() === 0
+    ) {
+      stopCollecting();
+    }
+  }
+
+  collectWater() {
+    const stopCollecting = () => {
+      this.isCollecting = false;
+      this.state = "Wandering";
+      this.foundWaterObject = null;
+      this.progressBar = 0;
+      this.move();
+    };
+
+    const amountToCollect = 20 * this.deltaTime;
+
+    if (this.foundWaterObject) {
+      this.inventory.addWater(amountToCollect);
+      this.progressBar =
+        (this.inventory.water / Settings.settings.game.waterInventoryLimit) *
+        100;
+    } else {
+      stopCollecting();
+    }
+
+    if (
+      this.progressBar >= 100 ||
+      this.inventory.water >= Settings.settings.game.waterInventoryLimit ||
+      !this.foundWaterObject
+    ) {
+      stopCollecting();
+    }
+  }
+
+  findMate() {
+    if (!!this.inViewSubgrid && !this.foundMate) {
+      const population = this.populationController.population;
+      const myIndex = population.indexOf(this);
+      const size = population.length;
+
+      for (let i = myIndex + 1; i < size; i++) {
+        const potentialMate = population[i];
+        if (potentialMate.matingUrge > 90) {
+          if (this.humanCollidesWithViewrange(potentialMate)) {
+            const randomPoint = randChoice(this.inViewSubgrid);
+
+            this.findPath(randomPoint);
+            potentialMate.findPath(randomPoint);
+
+            if (this.path.length && potentialMate.path.length) {
+              this.foundMate = potentialMate;
+              potentialMate.foundMate = this;
+              return potentialMate;
+            }
+          }
+        }
+      }
+    }
+
+    this.move();
+    return null;
+  }
+
+  handleMating() {
+    const stopMating = () => {
+      if (this.foundMate) {
+        if (this.gender === Gender.FEMALE) {
+          this.getPregnant(this.foundMate);
+        } else {
+          this.foundMate.getPregnant(this);
+        }
+      }
+      this.isMating = false;
+      this.state = "Wandering";
+      this.foundMate = null;
+      this.progressBar = 0;
+      this.matingUrge = 0;
+      this.move();
+    };
+
+    if (this.foundMate?.isMating && this.isMating) {
+      this.progressBar += 30 * this.deltaTime;
+      this.foundMate.progressBar += 30 * this.deltaTime;
+    }
+
+    if (this.foundMate) {
+      if (this.foundMate?.progressBar >= 100 || this.progressBar >= 100) {
+        stopMating();
+      }
+    } else {
+      stopMating();
+    }
+  }
+
+  humanCollidesWithViewrange(human: Human) {
+    if (!!this.inViewSubgrid) {
+      const viewRangeStartPosition = this.inViewSubgrid[0].position;
+      const viewRangeSize =
+        (this.viewrange * 2 + 1) * Settings.settings.world.tileSize;
+
+      // Calculate the center of the square
+      const squareCenter = {
+        x: viewRangeStartPosition.x + viewRangeSize / 2,
+        y: viewRangeStartPosition.y + viewRangeSize / 2,
+      };
+
+      // Calculate the distance between the center of the circle and the center of the square
+      const distanceX = Math.abs(human.position.x - squareCenter.x);
+      const distanceY = Math.abs(human.position.y - squareCenter.y);
+
+      // If the distance is greater than half the diagonal of the square plus the radius of the circle, there is no collision
+      const diagonal = Math.sqrt(viewRangeSize ** 2 + viewRangeSize ** 2);
+      if (
+        distanceX > diagonal / 2 + human.radius ||
+        distanceY > diagonal / 2 + human.radius
+      ) {
+        return false;
+      }
+
+      // If the distance is less than half the diagonal of the square, there is definitely a collision
+      if (distanceX <= viewRangeSize / 2 || distanceY <= viewRangeSize / 2) {
+        return true;
+      }
+
+      // If the distance is between these two values, there is a collision if the distance from the center of the circle to
+      // the closest point on the square is less than or equal to the radius of the circle
+      const cornerDistanceSquared =
+        (distanceX - viewRangeSize / 2) ** 2 +
+        (distanceY - viewRangeSize / 2) ** 2;
+      return cornerDistanceSquared <= human.radius ** 2;
+    }
+    return false;
+  }
+
+  getPregnant(father: Human) {
+    //pass
   }
 }
 

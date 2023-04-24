@@ -147,3 +147,9 @@ nav{
 .ui-state{
   padding-top:0.5rem;
 }
+
+.ui-info-wrapper{
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}

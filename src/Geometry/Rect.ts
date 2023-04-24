@@ -1,4 +1,3 @@
-import Color from "../UI/Color";
 import { Vector2 } from "../Vector/Vector2";
 
 class Rect {
@@ -21,9 +20,21 @@ class Rect {
     return this;
   }
 
-  setFillStyle(fill: Color) {
-    this.fillStyle = fill as string;
+  setFillStyle(fill: string) {
+    this.fillStyle = fill
     return this;
+  }
+
+  setStrokeStyle(stroke: string) {
+    this.strokeStyle = stroke;
+    return this;
+  }
+
+  getCenter() {
+    let centerX = Math.ceil(this.position.x + this.size.x / 2);
+    let centerY = Math.ceil(this.position.y + this.size.y / 2);
+
+    return new Vector2(centerX, centerY);
   }
 
   copy() {

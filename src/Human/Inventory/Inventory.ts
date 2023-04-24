@@ -1,37 +1,27 @@
 class Inventory {
-    wood: number;
-    food: number;
-    stone: number;
+  water: number;
+  food: number;
 
-    constructor() {
-        this.wood = 0;
-        this.food = 0;
-        this.stone = 0;
-    }
+  constructor() {
+    this.food = 0;
+    this.water = 0;
+  }
 
-    addWood(val: number) {
-        this.wood += val;
-    }
+  addWater(val: number) {
+    this.water += val;
+  }
 
-    addStone(val: number) {
-        this.stone += val;
-    }
+  addFood(val: number) {
+    this.food += val;
+  }
 
-    addFood(val: number) {
-        this.food += val;
-    }
+  removeWater(val: number) {
+    this.water -= val;
+  }
 
-    removeWood(val: number) {
-        this.wood -= val;
-    }
-
-    removeStone(val: number) {
-        this.stone -= val;
-    }
-
-    removeFood(val: number) {
-        this.food -= val;
-    }
+  removeFood(val: number) {
+    this.food -= val;
+  }
 }
 
 export default Inventory;

@@ -90,14 +90,23 @@ class UI {
                       }>${human.gender === 0 ? "Male" : "Female"}</div>
                       <div class='ui-unimportant'>${human.id}</div>
                       <div class='ui-inventory-wrapper'>
-                        <div>Food: <span>${human.inventory.food.toFixed(2)}</span></div>
-                        <div>Stone: <span>${human.inventory.stone.toFixed(2)}</span></div>
-                        <div>Wood: <span>${human.inventory.wood.toFixed(2)}</span></div>
+                        <div>Food: <span>${Math.round(human.inventory.food)}</span></div>
+                        <div>Water: <span>${Math.round(human.inventory.water)}</span></div>
                       </div>
                       <div class='ui-state'>${human.state}</div>
                   </div>
-                  <div>
-                      <div>Hunger: <progress value=${human.hunger} max="100"></progress></div>
+                  <div class='ui-info-wrapper'>
+                      <div>
+                        <div>Hunger: <progress value=${human.hunger} max="100"></progress></div>
+                        <div>Thirst: <progress value=${human.thirst} max="100"></progress></div>
+                        <div>Mating: <progress value=${human.matingUrge} max="100"></progress></div>
+                      </div>
+                      <div>
+                        <div>Has food: ${!!human.foundFoodObject}</div>
+                        <div>Has water: ${!!human.foundWaterObject}</div>
+                        <div>Has mate: ${!!human.foundMate}</div>
+                        <div>Path length: ${human.path.length}</div>
+                      </div>
                   </div>
               </div>
               `;
