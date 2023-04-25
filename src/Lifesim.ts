@@ -260,7 +260,7 @@ class Lifesim {
       }
 
       this.drawProgressBar(human);
-      this.drawCircle(human);
+      this.drawCircle(human, 1);
     }
   }
 
