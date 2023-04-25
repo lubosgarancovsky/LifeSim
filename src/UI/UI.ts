@@ -1,6 +1,5 @@
 import Gender from "../Human/Gender";
 import Human from "../Human/Human";
-import PopulationController from "../Human/PopulationController";
 
 class UI {
   private population: any = {
@@ -79,37 +78,37 @@ class UI {
   }
 
   drawPopulationList(population: Human[]) {
-    if (!!this.state.command) {
+    if (!!this.state.command && !!population.length) {
       const mappedHumans = population.map((human, index) => {
         return `
-              <div class='ui-human-infocard' key=${index}>
-                  <div>
-                      <div>${human.name}</div>
-                      <div class=${
-                        human.gender === 0 ? "ui-male" : "ui-female"
-                      }>${human.gender === 0 ? "Male" : "Female"}</div>
-                      <div class='ui-unimportant'>${human.id}</div>
-                      <div class='ui-inventory-wrapper'>
-                        <div>Food: <span>${Math.round(human.inventory.food)}</span></div>
-                        <div>Water: <span>${Math.round(human.inventory.water)}</span></div>
-                      </div>
-                      <div class='ui-state'>${human.state}</div>
-                  </div>
-                  <div class='ui-info-wrapper'>
-                      <div>
-                        <div>Hunger: <progress value=${human.hunger} max="100"></progress></div>
-                        <div>Thirst: <progress value=${human.thirst} max="100"></progress></div>
-                        <div>Mating: <progress value=${human.matingUrge} max="100"></progress></div>
-                      </div>
-                      <div>
-                        <div>Has food: ${!!human.foundFoodObject}</div>
-                        <div>Has water: ${!!human.foundWaterObject}</div>
-                        <div>Has mate: ${!!human.foundMate}</div>
-                        <div>Path length: ${human.path.length}</div>
-                      </div>
-                  </div>
-              </div>
-              `;
+        <div class='ui-human-infocard' key=${index}>
+          <div>
+            <div class='ui-name'>${human.name}</div>
+            <div class=${human.gender === 0 ? "ui-male" : "ui-female"}>${
+          human.gender === 0 ? "Male" : "Female"
+        }</div>
+            <div class='ui-unimportant'>${human.id}</div>
+          </div>
+          <div class='ui-card-middlepart'>
+            <div class='ui-inventory-wrapper'>
+              <div>Food: <span>${Math.round(human.inventory.food)}</span></div>
+              <div>Water: <span>${Math.round(human.inventory.water)}</span></div>
+            </div>
+            <div class='ui-progressbars'>
+              <div>Hunger: <progress id='pb-hunger' value=${ human.hunger} max="100"></progress></div>
+              <div>Thirst: <progress id='pb-thirst' value=${human.thirst} max="100"></progress></div>
+              <div>Mating: <progress id='pb-mating' value=${human.matingUrge} max="100"></progress></div>
+              ${human.isPregnant ? `<div>Pregnancy: <progress id='pb-pregnancy' value=${human.pregnancyMeter} max="100"></progress></div>` : ''}
+            </div>
+          </div>
+          <div class='ui-values'>
+            <div><span>Has food:</span> <span class=${!!human.foundFoodObject ? 'ui-success' : 'ui-error'}>${!!human.foundFoodObject}</span></div>
+            <div><span>Has water:</span> <span class=${!!human.foundWaterObject ? 'ui-success' : 'ui-error'}>${!!human.foundWaterObject}</span></div>
+            <div><span>Has mate:</span> <span class=${!!human.foundMate ? 'ui-success' : 'ui-error'}>${!!human.foundMate}</span></div>
+            <div><span>Path length:</span> <span>${human.path.length}</span></div>
+          </div>
+          <div class=ui-state>${human.state}</div>
+        </div>`;
       });
 
       this.UIElements.cammandPopulationList.innerHTML = mappedHumans.join("");
@@ -118,3 +117,53 @@ class UI {
 }
 
 export default UI;
+
+/*
+`
+              <div class='ui-human-infocard' key=${index}>
+                  <div class='ui-human-card-layout'>
+                    <div>
+                        <div>${human.name}</div>
+                        <div class=${
+                          human.gender === 0 ? "ui-male" : "ui-female"
+                        }>${human.gender === 0 ? "Male" : "Female"}</div>
+                        <div class='ui-unimportant'>${human.id}</div>
+                        <div class='ui-inventory-wrapper'>
+                          <div>Food: <span>${Math.round(
+                            human.inventory.food
+                          )}</span></div>
+                          <div>Water: <span>${Math.round(
+                            human.inventory.water
+                          )}</span></div>
+                        </div>
+                        
+                    </div>
+                    <div class='ui-info-wrapper'>
+                        <div class='ui-progressbars'>
+                          <div>Hunger: <progress id='pb-hunger' value=${
+                            human.hunger
+                          } max="100"></progress></div>
+                          <div>Thirst: <progress id='pb-thirst' value=${
+                            human.thirst
+                          } max="100"></progress></div>
+                          <div>Mating: <progress id='pb-mating' value=${
+                            human.matingUrge
+                          } max="100"></progress></div>
+                          <div>Pregnancy: <progress id='pb-pregnancy' value=${
+                            human.pregnancyMeter
+                          } max="100"></progress></div>
+                        </div>
+                        <div class='ui-values'>
+                          <div><span>Has food:</span> <span>${!!human.foundFoodObject}</span></div>
+                          <div><span>Has water:</span> <span>${!!human.foundWaterObject}</span></div>
+                          <div><span>Has mate:</span> <span>${!!human.foundMate}</span></div>
+                          <div><span>Path length:</span> <span>${
+                            human.path.length
+                          }</span></div>
+                        </div>
+                    </div>
+                  </div>
+              </div>
+              `
+
+*/

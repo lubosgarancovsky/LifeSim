@@ -1,4 +1,4 @@
-import { heuristic, lerp, randChoice } from "../../utils/math";
+import { heuristic, lerp, randChoice, randInt } from "../../utils/math";
 import { randomFemale, randomId, randomMale } from "../../utils/population";
 import Circle from "../Geometry/Circle";
 import ResourceController from "../Resources/ResourceController";
@@ -14,6 +14,7 @@ import { HumanDecisionTree } from "./DecisionTree/DecisionTree";
 import Food from "../Resources/Food";
 import TerraintType from "../Terrain/TerrainType";
 import PopulationController from "./PopulationController";
+import { Genetics } from "./Genetics";
 
 class Human extends Circle {
   name: string;
@@ -24,11 +25,9 @@ class Human extends Circle {
   resourceController: ResourceController;
   populationController: PopulationController;
 
-  viewrange: number = 4;
   inViewSubgrid: Tile[] | null = null;
   path: Tile[] = [];
   destination: Vector2 | null;
-  speed: number = 50;
   deltaTime: number;
   inventory: Inventory;
   progressBar: number = 0;
@@ -52,6 +51,12 @@ class Human extends Circle {
   isDrinking: boolean = false;
   isMating: boolean = false;
   isCollecting: boolean = false;
+
+  isPregnant: boolean = false;
+  awaitedChildren: Human[] = [];
+  pregnancyMeter: number = 0;
+
+  genes: Genetics;
 
   constructor(
     gender: Gender,
@@ -85,7 +90,6 @@ class Human extends Circle {
       this.name = randomFemale();
     }
 
-    this.notifyUI(1);
     this.state = "Wandering";
   }
 
@@ -97,12 +101,20 @@ class Human extends Circle {
     this.decisionTree.evaluate(this);
 
     this.handleNeedsIncrement(deltaTime);
+
+    if (this.isPregnant) {
+      this.handlePregnancy(deltaTime);
+    }
+  }
+
+  setGenes(gen: Genetics) {
+    this.genes = gen;
   }
 
   handleNeedsIncrement(deltaTime) {
     this.hunger += 1 * deltaTime;
     this.thirst += 1.5 * deltaTime;
-    this.matingUrge += 20 * deltaTime;
+    this.matingUrge += 4 * deltaTime;
 
     if (this.hunger < 0) {
       this.hunger = 0;
@@ -118,10 +130,14 @@ class Human extends Circle {
 
     if (this.hunger > 100) {
       this.hunger = 100;
+      this.populationController.removeHuman(this);
+      this.notifyUI(-1);
     }
 
     if (this.thirst > 100) {
       this.thirst = 100;
+      this.populationController.removeHuman(this);
+      this.notifyUI(-1);
     }
 
     if (this.matingUrge > 100) {
@@ -141,8 +157,8 @@ class Human extends Circle {
         this.destination.x - this.position.x
       );
 
-      const dx = Math.cos(radians) * this.speed * this.deltaTime;
-      const dy = Math.sin(radians) * this.speed * this.deltaTime;
+      const dx = Math.cos(radians) * this.genes.speed * this.deltaTime;
+      const dy = Math.sin(radians) * this.genes.speed * this.deltaTime;
 
       // keep returning until destination is reached
       if (distance > 1) {
@@ -261,7 +277,7 @@ class Human extends Circle {
     this.inViewSubgrid = this.terrainController.getSubGrid(
       this.position.x,
       this.position.y,
-      this.viewrange
+      this.genes.viewRange
     );
   }
 
@@ -546,8 +562,6 @@ class Human extends Circle {
       if (this.foundMate) {
         if (this.gender === Gender.FEMALE) {
           this.getPregnant(this.foundMate);
-        } else {
-          this.foundMate.getPregnant(this);
         }
       }
       this.isMating = false;
@@ -576,7 +590,7 @@ class Human extends Circle {
     if (!!this.inViewSubgrid) {
       const viewRangeStartPosition = this.inViewSubgrid[0].position;
       const viewRangeSize =
-        (this.viewrange * 2 + 1) * Settings.settings.world.tileSize;
+        (this.genes.viewRange * 2 + 1) * Settings.settings.world.tileSize;
 
       // Calculate the center of the square
       const squareCenter = {
@@ -613,7 +627,57 @@ class Human extends Circle {
   }
 
   getPregnant(father: Human) {
-    //pass
+    if (
+      this.genes.fertility + father.genes.fertility >=
+        Settings.settings.game.fertility &&
+      !this.isPregnant
+    ) {
+      this.isPregnant = true;
+
+      const chance = Math.random();
+      let numberOfChildren = 1;
+
+      if (chance > 0.75) {
+        numberOfChildren = 2;
+      }
+
+      if (chance > 0.9) {
+        numberOfChildren = 3;
+      }
+
+      const children: Human[] = [];
+
+      for (let i = 0; i < numberOfChildren; i++) {
+        const child = new Human(
+          randChoice([Gender.MALE, Gender.FEMALE]),
+          this.UIController,
+          this.terrainController,
+          this.resourceController,
+          this.populationController
+        );
+
+        child.setGenes(Genetics.getGenesFromParents(father, this));
+        children.push(child);
+      }
+
+      this.awaitedChildren = children;
+    }
+  }
+
+  handlePregnancy(deltaTime: number) {
+    this.pregnancyMeter += 2 * deltaTime;
+
+    if (this.pregnancyMeter >= 100) {
+      this.pregnancyMeter = 0;
+      this.isPregnant = false;
+
+      for (let i = 0; i < this.awaitedChildren.length; i++) {
+        const child = this.awaitedChildren[i];
+        child.setPosition(Vector2.copy(this.position));
+        this.populationController.population.push(child);
+        child.notifyUI(1);
+      }
+    }
   }
 }
 

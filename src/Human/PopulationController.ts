@@ -4,6 +4,7 @@ import Terrain from "../Terrain/Terrain";
 import UI from "../UI/UI";
 import { Vector2 } from "../Vector/Vector2";
 import Gender from "./Gender";
+import { Genetics } from "./Genetics";
 import Human from "./Human";
 
 class PopulationController {
@@ -25,37 +26,54 @@ class PopulationController {
 
   init(males: number = 2, females: number = 2) {
     for (let i = 0; i < males; i++) {
-      this.population.push(
-        new Human(
-          Gender.MALE,
-          this.UIController,
-          this.terrainController,
-          this.resourceController,
-          this,
-        ).setPosition(Vector2.copy(randChoice(this.terrainController.ground).position))
+      const man = new Human(
+        Gender.MALE,
+        this.UIController,
+        this.terrainController,
+        this.resourceController,
+        this
+      ).setPosition(
+        Vector2.copy(randChoice(this.terrainController.ground).position)
       );
+
+      man.setGenes(Genetics.randomGenes());
+      man.notifyUI(1);
+      this.population.push(man);
     }
 
     for (let i = 0; i < females; i++) {
-      this.population.push(
-        new Human(
-          Gender.FEMALE,
-          this.UIController,
-          this.terrainController,
-          this.resourceController,
-          this,
-        ).setPosition(Vector2.copy(randChoice(this.terrainController.ground).position))
+      const woman = new Human(
+        Gender.FEMALE,
+        this.UIController,
+        this.terrainController,
+        this.resourceController,
+        this
+      ).setPosition(
+        Vector2.copy(randChoice(this.terrainController.ground).position)
       );
+
+      woman.setGenes(Genetics.randomGenes());
+      woman.notifyUI(1);
+      this.population.push(woman);
     }
   }
 
   update(deltaTime: number) {
     const populationSize = this.population.length;
-    for (let i = 0; i < populationSize; i++) {
-      this.population[i].update(deltaTime);
-    }
 
-    this.updateUI();
+    if (populationSize > 0) {
+      for (let i = 0; i < populationSize; i++) {
+        if (this.population[i]) {
+          this.population[i].update(deltaTime);
+        }
+      }
+
+      this.updateUI();
+    }
+  }
+
+  removeHuman(human: Human) {
+    this.population = this.population.filter((i) => i != human);
   }
 
   updateUI() {

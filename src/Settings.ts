@@ -2,10 +2,11 @@ class Settings {
 
   static settings = {
     game:{
-        males: 1,
-        females: 1,
+        males: 5,
+        females: 5,
         foodInventoryLimit: 35,
-        waterInventoryLimit: 35
+        waterInventoryLimit: 35,
+        fertility: 1
     },
     world: {
       tileSize: 32,
@@ -26,8 +27,8 @@ class Settings {
       progressbarFG: "rgb(0, 0, 0)",
     },
     debug: {
-      viewRange: true,
-      path: true,
+      viewRange: false,
+      path: false,
       resources: false,
       resourceAmount: false,
       resourceItem: false,

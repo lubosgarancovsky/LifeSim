@@ -192,7 +192,7 @@ class Lifesim {
 
         if (!!subgrid) {
           const viewRangeSize =
-            Settings.settings.world.tileSize * (human.viewrange * 2 + 1);
+            Settings.settings.world.tileSize * (human.genes.viewRange * 2 + 1);
           const viewRange = new Rect()
             .setPosition(subgrid[0].position)
             .setSize(new Vector2(viewRangeSize, viewRangeSize))
