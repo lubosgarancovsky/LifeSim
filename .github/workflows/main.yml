@@ -1,10 +1,8 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+name: LifeSim build and deploy CI
 
 on:
   push:
     branches: ['main']
-
   workflow_dispatch:
 
 permissions:
@@ -17,10 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  npm-install:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,8 +27,30 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm install
+
+  build:
+    needs: npm-install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
       - name: Build
         run: npm run build
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
