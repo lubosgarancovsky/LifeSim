@@ -330,7 +330,7 @@ class Lifesim {
 
       const thirst = new Rect()
       .setFillStyle("#00b9fc")
-      .setSize(new Vector2((human.hunger / 100) * 35, 3))
+      .setSize(new Vector2((human.thirst / 100) * 35, 3))
       .setPosition(
         new Vector2(
           human.position.x + human.radius + 5,
@@ -340,7 +340,7 @@ class Lifesim {
 
       const mating = new Rect()
       .setFillStyle("#f51b59")
-      .setSize(new Vector2((human.hunger / 100) * 35, 3))
+      .setSize(new Vector2((human.matingUrge / 100) * 35, 3))
       .setPosition(
         new Vector2(
           human.position.x + human.radius + 5,
