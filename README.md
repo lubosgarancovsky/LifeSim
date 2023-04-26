@@ -59,7 +59,7 @@ Actors have an inventory with some space for food and water. If the actors has n
 When he has a need to eat or drink, he first looks into his inventory for resources. Only if its empty, he starts looking outside for new resources.
 
 ### Movement
-For movement, actors use an **A* pathfinding** alghoritm. They navigate a subgrid of a world grid.
+For movement, actors use an **Astar pathfinding** alghoritm. They navigate a subgrid of a world grid.
 This subgrid is calculated based on a `viewrange` of an actor. If a viewrange is 4, then the viewrange subgrid is (4 + 1) * (4 + 1) tiles big and centered around an actor.
 This means, that in this situation, actor is able to see 4 tiles to the left 4 tiles to the right, 4 tiles up, and 4 tiles down. The extra tile in the equation is the one he is standing on.
 
