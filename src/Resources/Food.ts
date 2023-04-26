@@ -34,7 +34,7 @@ class Food extends Circle {
 
   update(deltaTime) {
     if (this.amount < this.maxAmount) {
-      this.amount += 2 * deltaTime;
+      this.amount += Settings.settings.world.foodGrowingSpeed * deltaTime;
       this.radius = ((this.amount / this.maxAmount) * 100) * (this.parentTile.size.x * 0.3) / 100;
     }
   }

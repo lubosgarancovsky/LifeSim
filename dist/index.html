@@ -5,84 +5,48 @@
     <link rel="icon" type="image/svg+xml" href="./icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
-    <base href="./LifeSim">
+    <base href="./LifeSim" />
     <title>Life Sim</title>
-    <script type="module" crossorigin src="/LifeSim/assets/index.bc4cb177.js"></script>
-    <link rel="stylesheet" href="/LifeSim/assets/index.38d88f9b.css">
+    <script type="module" crossorigin src="/LifeSim/assets/index.7d575214.js"></script>
+    <link rel="stylesheet" href="/LifeSim/assets/index.87eed182.css">
   </head>
   <body>
     <div id="app">
       <canvas class="canvas"></canvas>
-      <div class="screen">
-        <div class="info">
-          <h2 id="population">Population: 20</h2>
-          <br/>
-          <h3 id="male">Male: 10</h3>
-          <h3 id="female">Female: 10</h3>
-        </div>
 
-        <div class="controls">
-          <button id="addMale">Add male</button>
-          <button id="addFemale">Add female</button>
-          <button id="clearPop">Clear</button>
-        </div>
-        
-        <div class="settingsButtonWrapper">
-          <button id="settingsBtn">Settings</button>
-        </div>
-
-        <div class="settings hidden">
-          <form>
-            <div class="input-wrapper">
-              <label for="food">Food density</label>
-              <input id="food" type="range" />
+      <div class="UI">
+        <nav>
+          <div class="inline-container">
+            <div class="inline-information">
+              <span class="ui-label">Population: </span>
+              <span id="ui-population-value-population">0</span>
             </div>
 
-            <div class="input-wrapper">
-              <label for="water">Water density</label>
-              <input id="water" type="range" />
+            <div class="inline-information">
+              <span class="ui-label">Men: </span>
+              <span id="ui-population-value-males">0</span>
             </div>
 
-            <div class="input-wrapper">
-              <label for="mating">Mating frequency</label>
-              <input id="mating" type="range" step="10"/>
+            <div class="inline-information">
+              <span class="ui-label">Women: </span>
+              <span id="ui-population-value-females">0</span>
             </div>
-
-            <div class="input-wrapper-inline">
-              <input id="viewrange" type="checkbox" />
-              <label for="viewrange">Show viewrange: </label>
-            </div>
-
-            <div class="input-wrapper-inline">
-              <input id="hud" type="checkbox" />
-              <label for="hud">Show HUD</label>
-            </div>
-
-            <div class="input-wrapper-inline">
-              <input id="destination" type="checkbox" />
-              <label for="destination">Show destination</label>
-            </div>
-
-            <div class="input-wrapper-inline">
-              <label for="malesCount">Number of males: </label>
-              <input id="malesCount" type="number" />
-            </div>
-
-            <div class="input-wrapper-inline">
-              <label for="femalesCount">Number of females: </label>
-              <input id="femalesCount" type="number" /> 
-            </div>
-
-            <div class="input-wrapper-inline">
-              <label for="worldSize">World size: </label>
-              <input id="worldSize" type="number" /> 
-            </div>
-          </form>
-
-          <button id="applySettings">Apply and restart</button>
+          </div>
+          <div class="navbar-button-wrapper">
+            <button id="command-button" class="icon-button">
+              <img src="/LifeSim/assets/console.4d5710b4.svg" />
+            </button>
+            <button id="settings-button" class="icon-button">
+              <img src="/LifeSim/assets/settings.46633bba.svg" />
+            </button>
+          </div>
+        </nav>
+        <div class="ui-section-wrapper">
+          <div id="command-section" class="iu-section-command hidden">
+            <div id="command-section-population-list"></div>
+          </div>
         </div>
       </div>
-
     </div>
     <script src="https://unpkg.com/perlin-noise-3d"></script>
     

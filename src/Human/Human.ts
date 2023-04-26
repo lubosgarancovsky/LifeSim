@@ -1,4 +1,4 @@
-import { heuristic, lerp, randChoice, randInt } from "../../utils/math";
+import { heuristic, randChoice } from "../../utils/math";
 import { randomFemale, randomId, randomMale } from "../../utils/population";
 import Circle from "../Geometry/Circle";
 import ResourceController from "../Resources/ResourceController";
@@ -58,6 +58,9 @@ class Human extends Circle {
 
   genes: Genetics;
 
+  age: number = 0;
+  isChild: boolean = true;
+
   constructor(
     gender: Gender,
     UIController: UI,
@@ -76,7 +79,7 @@ class Human extends Circle {
 
     this.gender = gender;
     this.position = new Vector2(250, 250);
-    this.radius = Settings.settings.world.tileSize * 0.25;
+    this.radius = Settings.settings.world.tileSize * 0.15;
     this.fillStyle = Settings.settings.colors.human;
     this.inventory = new Inventory();
 
@@ -102,6 +105,8 @@ class Human extends Circle {
 
     this.handleNeedsIncrement(deltaTime);
 
+    this.handleAging(deltaTime);
+
     if (this.isPregnant) {
       this.handlePregnancy(deltaTime);
     }
@@ -112,9 +117,12 @@ class Human extends Circle {
   }
 
   handleNeedsIncrement(deltaTime) {
-    this.hunger += 1 * deltaTime;
-    this.thirst += 1.5 * deltaTime;
-    this.matingUrge += 4 * deltaTime;
+    this.hunger += this.genes.hungerModificator * deltaTime;
+    this.thirst += this.genes.thirstModificator * deltaTime;
+    
+    if(!this.isChild) {
+      this.matingUrge += this.genes.matingModificator * deltaTime;
+    }
 
     if (this.hunger < 0) {
       this.hunger = 0;
@@ -536,7 +544,7 @@ class Human extends Circle {
 
       for (let i = myIndex + 1; i < size; i++) {
         const potentialMate = population[i];
-        if (potentialMate.matingUrge > 90) {
+        if (potentialMate.matingUrge > 90 && potentialMate.gender != this.gender) {
           if (this.humanCollidesWithViewrange(potentialMate)) {
             const randomPoint = randChoice(this.inViewSubgrid);
 
@@ -633,6 +641,7 @@ class Human extends Circle {
       !this.isPregnant
     ) {
       this.isPregnant = true;
+      this.fillStyle = Settings.settings.colors.pregnantHuman;
 
       const chance = Math.random();
       let numberOfChildren = 1;
@@ -665,11 +674,12 @@ class Human extends Circle {
   }
 
   handlePregnancy(deltaTime: number) {
-    this.pregnancyMeter += 2 * deltaTime;
+    this.pregnancyMeter += Settings.settings.game.pregnancyMeterSpeed * deltaTime;
 
     if (this.pregnancyMeter >= 100) {
       this.pregnancyMeter = 0;
       this.isPregnant = false;
+      this.fillStyle = Settings.settings.colors.human;
 
       for (let i = 0; i < this.awaitedChildren.length; i++) {
         const child = this.awaitedChildren[i];
@@ -677,6 +687,19 @@ class Human extends Circle {
         this.populationController.population.push(child);
         child.notifyUI(1);
       }
+    }
+  }
+
+  handleAging(deltaTime: number) {
+    this.age += Settings.settings.game.agingSpeed * deltaTime;
+
+    if (this.age < 0) {
+      this.age = 0;
+    }
+
+    if (this.age >= Settings.settings.game.adultAge && this.isChild) {
+      this.isChild = false;
+      this.radius = Settings.settings.world.tileSize * 0.25;
     }
   }
 }

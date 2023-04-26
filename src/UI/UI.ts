@@ -83,7 +83,7 @@ class UI {
         return `
         <div class='ui-human-infocard' key=${index}>
           <div>
-            <div class='ui-name'>${human.name}</div>
+            <div class='ui-name'><span>${human.name}</span><span>Age: ${Math.floor(human.age)}</span></div>
             <div class=${human.gender === 0 ? "ui-male" : "ui-female"}>${
           human.gender === 0 ? "Male" : "Female"
         }</div>
