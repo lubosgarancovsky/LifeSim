@@ -259,6 +259,10 @@ class Lifesim {
         );
       }
 
+      if (Settings.settings.game.hud) {
+        this.drawHud(human);
+      }
+
       this.drawProgressBar(human);
       this.drawCircle(human, 1);
     }
@@ -270,7 +274,7 @@ class Lifesim {
       this.ctx.fillStyle = Settings.settings.colors.progressbarBG;
       this.ctx.fillRect(
         human.position.x - human.radius * 1.5,
-        human.position.y - human.radius * 2,
+        human.position.y + human.radius * 2,
         human.radius * 3,
         3
       );
@@ -279,11 +283,74 @@ class Lifesim {
       this.ctx.fillStyle = Settings.settings.colors.progressbarFG;
       this.ctx.fillRect(
         human.position.x - human.radius * 1.5,
-        human.position.y - human.radius * 2,
+        human.position.y + human.radius * 2,
         ((human.radius * 3) / 100) * human.progressBar,
         3
       );
     }
+  }
+
+  drawHud(human: Human) {
+    // Name and state
+    this.ctx.fillStyle = "rgb(0, 0, 0)";
+    this.ctx.font = "11px Courier New";
+    this.ctx.textAlign = "left";
+    this.ctx.fillText(
+      `${human.age.toFixed(0)} ${human.name}`,
+      human.position.x - human.radius,
+      human.position.y - human.radius - 15
+    );
+    this.ctx.font = "9px Courier New";
+    this.ctx.fillStyle = "rgb(40, 40, 40)";
+    this.ctx.fillText(
+      human.state,
+      human.position.x - human.radius,
+      human.position.y - human.radius - 5
+    );
+
+    // Needs
+    const wrapper = new Rect()
+      .setFillStyle(Settings.settings.colors.hudWrapper)
+      .setSize(new Vector2(30, 9))
+      .setPosition(
+        new Vector2(
+          human.position.x + human.radius + 5,
+          human.position.y - human.radius / 2
+        )
+      );
+    const hunger = new Rect()
+      .setFillStyle("#f08a65")
+      .setSize(new Vector2((human.hunger / 100) * 35, 3))
+      .setPosition(
+        new Vector2(
+          human.position.x + human.radius + 5,
+          human.position.y - human.radius / 2
+        )
+      );
+
+      const thirst = new Rect()
+      .setFillStyle("#00b9fc")
+      .setSize(new Vector2((human.hunger / 100) * 35, 3))
+      .setPosition(
+        new Vector2(
+          human.position.x + human.radius + 5,
+          (human.position.y - human.radius / 2) + 3
+        )
+      );
+
+      const mating = new Rect()
+      .setFillStyle("#f51b59")
+      .setSize(new Vector2((human.hunger / 100) * 35, 3))
+      .setPosition(
+        new Vector2(
+          human.position.x + human.radius + 5,
+          (human.position.y - human.radius / 2) + 6
+        )
+      );
+    this.drawRect(wrapper);
+    this.drawRect(hunger);
+    this.drawRect(thirst);
+    this.drawRect(mating);
   }
 }
 export default Lifesim;

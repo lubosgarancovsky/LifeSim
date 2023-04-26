@@ -4,6 +4,7 @@ class Settings {
     game:{
         males: 10,
         females: 10,
+        hud: true,
         foodInventoryLimit: 35,
         waterInventoryLimit: 35,
         fertility: 1,
@@ -30,6 +31,7 @@ class Settings {
       femaleStroke: "#ff05e6",
       progressbarBG: "rgb(0, 0, 0, 0.4)",
       progressbarFG: "rgb(0, 0, 0)",
+      hudWrapper: "rgba(0, 0, 0, 0.1)"
     },
     debug: {
       viewRange: false,

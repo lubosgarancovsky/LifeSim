@@ -1,5 +1,3 @@
-import Settings from "../Settings";
-import Color from "../UI/Color";
 import { Vector2 } from "../Vector/Vector2";
 
 class Circle {
@@ -22,8 +20,8 @@ class Circle {
     return this;
   }
 
-  setFillStyle(fill: Color) {
-    this.fillStyle = fill as string;
+  setFillStyle(color: string) {
+    this.fillStyle = color;
     return this;
   }
 }
