@@ -59,6 +59,7 @@ class Human extends Circle {
   genes: Genetics;
 
   age: number = 0;
+  lastAge: number = 0;
   isChild: boolean = true;
 
   constructor(
@@ -119,9 +120,14 @@ class Human extends Circle {
   handleNeedsIncrement(deltaTime) {
     this.hunger += this.genes.hungerModificator * deltaTime;
     this.thirst += this.genes.thirstModificator * deltaTime;
-    
-    if(!this.isChild) {
-      this.matingUrge += this.genes.matingModificator * deltaTime;
+
+    if (!this.isChild) {
+      if (this.age <= 34) {
+        this.matingUrge += this.genes.matingModificator * deltaTime * 1.5;
+      } else {
+        this.matingUrge +=
+          this.genes.matingModificator * (1 - this.age / 200) * deltaTime;
+      }
     }
 
     if (this.hunger < 0) {
@@ -539,12 +545,16 @@ class Human extends Circle {
   findMate() {
     if (!!this.inViewSubgrid && !this.foundMate) {
       const population = this.populationController.population;
-      const myIndex = population.indexOf(this);
       const size = population.length;
 
-      for (let i = myIndex + 1; i < size; i++) {
+      for (let i = 0; i < size; i++) {
         const potentialMate = population[i];
-        if (potentialMate.matingUrge > 90 && potentialMate.gender != this.gender) {
+        if (
+          potentialMate.matingUrge > 90 &&
+          potentialMate.gender != this.gender &&
+          potentialMate.foundMate === null &&
+          potentialMate != this
+        ) {
           if (this.humanCollidesWithViewrange(potentialMate)) {
             const randomPoint = randChoice(this.inViewSubgrid);
 
@@ -554,6 +564,10 @@ class Human extends Circle {
             if (this.path.length && potentialMate.path.length) {
               this.foundMate = potentialMate;
               potentialMate.foundMate = this;
+
+              this.move();
+              potentialMate.move();
+
               return potentialMate;
             }
           }
@@ -565,33 +579,42 @@ class Human extends Circle {
     return null;
   }
 
-  handleMating() {
-    const stopMating = () => {
-      if (this.foundMate) {
-        if (this.gender === Gender.FEMALE) {
-          this.getPregnant(this.foundMate);
-        }
-      }
-      this.isMating = false;
-      this.state = "Wandering";
-      this.foundMate = null;
-      this.progressBar = 0;
-      this.matingUrge = 0;
-      this.move();
-    };
-
-    if (this.foundMate?.isMating && this.isMating) {
-      this.progressBar += 30 * this.deltaTime;
-      this.foundMate.progressBar += 30 * this.deltaTime;
-    }
-
+  stopMating() {
     if (this.foundMate) {
-      if (this.foundMate?.progressBar >= 100 || this.progressBar >= 100) {
-        stopMating();
+      if (this.gender === Gender.FEMALE) {
+        this.getPregnant(this.foundMate);
       }
-    } else {
-      stopMating();
     }
+    this.isMating = false;
+    this.state = "Wandering";
+    this.foundMate = null;
+    this.progressBar = 0;
+    this.matingUrge = 0;
+    this.move();
+  }
+
+  handleMating() {
+    if (!!this.foundMate) {
+      if (this.foundMate.isMating && this.isMating) {
+        this.progressBar += 30 * this.deltaTime;
+        this.foundMate.progressBar += 30 * this.foundMate.deltaTime;
+      }
+
+      if (this.foundMate.progressBar >= 100 && this.progressBar >= 100) {
+        this.foundMate.stopMating();
+        this.stopMating();
+        return;
+      }
+
+      if (this.foundMate.foundMate !== this) {
+        this.stopMating();
+        return;
+      }
+
+      return;
+    }
+
+    this.stopMating();
   }
 
   humanCollidesWithViewrange(human: Human) {
@@ -635,9 +658,17 @@ class Human extends Circle {
   }
 
   getPregnant(father: Human) {
+    const motherFertility = this.genes.fertility - (this.age ^ 2) / 250;
+    const fatherFertility = father.genes.fertility - (father.age ^ 2) / 600;
+
+    const minFertility =
+      fatherFertility < motherFertility ? fatherFertility : motherFertility;
+
+    const combinedFertility = fatherFertility + motherFertility;
+
     if (
-      this.genes.fertility + father.genes.fertility >=
-        Settings.settings.game.fertility &&
+      minFertility > 0 &&
+      combinedFertility >= 10 - Settings.settings.game.pregnancyChance &&
       !this.isPregnant
     ) {
       this.isPregnant = true;
@@ -674,7 +705,8 @@ class Human extends Circle {
   }
 
   handlePregnancy(deltaTime: number) {
-    this.pregnancyMeter += Settings.settings.game.pregnancyMeterSpeed * deltaTime;
+    this.pregnancyMeter +=
+      Settings.settings.game.pregnancyMeterSpeed * deltaTime;
 
     if (this.pregnancyMeter >= 100) {
       this.pregnancyMeter = 0;
@@ -695,6 +727,20 @@ class Human extends Circle {
 
     if (this.age < 0) {
       this.age = 0;
+    }
+
+    if (Math.floor(this.age) > this.lastAge) {
+      this.lastAge = this.age;
+
+      const chanceToDie = Math.random() * 10;
+
+      if (chanceToDie < (this.age ^ 2) / 3000) {
+        this.populationController.removeHuman(this);
+      }
+    }
+
+    if (this.age >= 120) {
+      this.populationController.removeHuman(this);
     }
 
     if (this.age >= Settings.settings.game.adultAge && this.isChild) {

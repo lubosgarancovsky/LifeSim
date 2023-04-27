@@ -7,7 +7,7 @@ class Settings {
         hud: true,
         foodInventoryLimit: 35,
         waterInventoryLimit: 35,
-        fertility: 1,
+        pregnancyChance: 7,
         agingSpeed: 0.2,
         pregnancyMeterSpeed: 8,
         adultAge: 18
