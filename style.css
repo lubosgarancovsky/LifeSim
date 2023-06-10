@@ -115,7 +115,7 @@ nav {
   position: relative;
 }
 
-.iu-section-command {
+.iu-section-command, .iu-section-settings  {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.7);
@@ -187,19 +187,35 @@ progress {
   width: 100%;
 }
 
-#pb-hunger::-moz-progress-bar {
+#pb-hunger::-moz-progress-bar, #pb-hunger::-webkit-progress-bar {
   background: #f08a65;
 }
 
-#pb-thirst::-moz-progress-bar {
+#pb-thirst::-moz-progress-bar, #pb-thirst::-webkit-progress-bar  {
   background: #65a1f0;
 }
 
-#pb-mating::-moz-progress-bar {
+#pb-mating::-moz-progress-bar, #pb-mating::-webkit-progress-bar {
   background: #e66cdf;
 }
 
-#pb-pregnancy::-moz-progress-bar {
+#pb-pregnancy::-moz-progress-bar, #pb-pregnancy::-webkit-progress-bar {
+  background: #00b017;
+}
+
+#pb-hunger::-webkit-progress-value {
+  background: #f08a65;
+}
+
+#pb-thirst::-webkit-progress-value  {
+  background: #65a1f0;
+}
+
+#pb-mating::-webkit-progress-value {
+  background: #e66cdf;
+}
+
+#pb-pregnancy::-webkit-progress-value {
   background: #00b017;
 }
 
@@ -207,8 +223,73 @@ progress {
   display: flex;
   gap: 3rem;
 }
+.setings-group-section ul {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem
+}
+
+.setings-group-section ul li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+input {
+  background-color: rgba(144, 144, 144, 0.2);
+  border: none;
+  border-radius: 2px;
+  color: white;
+  padding: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.command-section-settings-wrapper{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 2rem;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.command-section-settings-wrapper h3 {
+  padding-bottom: 1rem;
+}
+
+.button-group{
+  display: flex;
+  flex-direction: column;
+  gap:0.75rem;
+}
+
+.button-group button{
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-weight: bold;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.193);
+  color: white;
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+
+.button-group button:hover{
+  background-color: rgba(255, 255, 255, 0.364);
+}
+
+.groups-wrapper {
+  display: flex;
+  gap: 4rem;
+}
 
 @media screen and (max-width: 800px) {
+  .groups-wrapper {
+    flex-direction: column;
+  }
+}
+
+@media (width < 800px) {
   .ui-human-card-layout {
     flex-direction: column;
     gap: 3rem;
@@ -218,6 +299,9 @@ progress {
 @media screen and (max-width: 400px) {
   #command-section-population-list  {
     padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   nav{

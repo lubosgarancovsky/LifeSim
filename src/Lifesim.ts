@@ -23,7 +23,7 @@ class Lifesim {
   private UIController: UI;
 
   constructor() {
-    this.tileSize = Settings.settings.world.tileSize;
+    this.tileSize = 0;
     this.isRunning = false;
     this.lastTime = 0;
     this.update = this.update.bind(this);
@@ -42,6 +42,7 @@ class Lifesim {
     }
 
     // init terrain
+    this.tileSize = Settings.settings.world.tileSize;
     const width = Math.ceil(this.canvas.width / this.tileSize);
     const height = Math.ceil(this.canvas.height / this.tileSize);
 
@@ -257,7 +258,20 @@ class Lifesim {
             .setFillStyle("rgba(0, 0, 0, 0)")
             .setStrokeStyle("rgba(0, 0, 0, 1)")
         );
+        
       }
+
+      if (Settings.settings.debug.resourceItem && humans[i].foundFoodObject) {
+        this.drawRect(
+          new Rect()
+            .setPosition(human.foundFoodObject!.getParent().position)
+            .setSize(human.foundFoodObject!.getParent().size)
+            .setFillStyle("rgba(0, 0, 0, 0)")
+            .setStrokeStyle("#baa820"),
+          1
+        );
+      }
+
 
       if (Settings.settings.game.hud) {
         this.drawHud(human);
@@ -351,6 +365,10 @@ class Lifesim {
     this.drawRect(hunger);
     this.drawRect(thirst);
     this.drawRect(mating);
+  }
+
+  setRunning(running: boolean) {
+    this.isRunning = running;
   }
 }
 export default Lifesim;

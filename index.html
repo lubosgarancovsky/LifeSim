@@ -43,6 +43,111 @@
           <div id="command-section" class="iu-section-command hidden">
             <div id="command-section-population-list"></div>
           </div>
+          <div id="settings-section" class="iu-section-settings hidden">
+            <div class="command-section-settings-wrapper">
+              <p>( * ) Settings labeled with asterix require a restart</p>
+              <div class="groups-wrapper">
+                <div class="settings-group ">
+                  <h3>Actions</h3>
+                  <div class="button-group">
+                    <button id="random-male">Add random male</button>
+                    <button id="random-female">Add random female</button>
+                    <button id="clear-all">Clear all</button>
+                    <button id="restart">Restart</button>
+                  </div>
+                </div>
+                <div class="settings-group">
+                  <h3>Game</h3>
+                  <div class="setings-group-section">
+                    <ul>
+                      <li>
+                        <span><input id="hud" type="checkbox" checked/> Enable HUD</span>
+                      </li>
+                      <li>
+                        <label htmlFor="males">Males*</label>
+                        <input id="males" type="number" value="10"/>
+                      </li>
+                      <li>
+                        <label htmlFor="females">Females*</label>
+                        <input id="females" type="number" value="10"/>
+                      </li>
+                      <li>
+                        <label htmlFor="food">Food inventory limit</label>
+                        <input id="food" type="number" value="35"/>
+                      </li>
+                      <li>
+                        <label htmlFor="water">Water inventory limit</label>
+                        <input id="water" type="number" value="35"/>
+                      </li>
+                      <li>
+                        <label htmlFor="chance">Pregnancy chance</label>
+                        <input id="chance" type="number" value="7"/>
+                      </li>
+                      <li>
+                        <label htmlFor="pregnancy">Pregnancy meter speed</label>
+                        <input id="pregnancy" type="number" value="8"/>
+                      </li>
+                      <li>
+                        <label htmlFor="adultAge">Adult age</label>
+                        <input id="adultAge" type="number" value="18"/>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+  
+                <div class="settings-group">
+                  <h3>World</h3>
+                  <div class="setings-group-section">
+                    <ul>
+                      <li>
+                        <label htmlFor="tileSize">Tile size (px)*</label>
+                        <input id="tileSize" type="number" value="32"/>
+                      </li>
+                      <li>
+                        <label htmlFor="waterDensity">Water density*</label>
+                        <input id="waterDensity" type="number" value="0.4"/>
+                      </li>
+                      <li>
+                        <label htmlFor="foodDensity">Food density*</label>
+                        <input id="foodDensity" type="number" value="0.05"/>
+                      </li>
+                      <li>
+                        <label htmlFor="foodMaxAmount">Food source capacity*</label>
+                        <input id="foodMaxAmount" type="number" value="400"/>
+                      </li>
+                      <li>
+                        <label htmlFor="growSpeed">Food growing speed</label>
+                        <input id="growSpeed" type="number" value="4"/>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+  
+                <div class="settings-group">
+                  <h3>Debug</h3>
+                  <div class="setings-group-section">
+                    <ul>
+                      <li>
+                        <span><input id="viewRange" type="checkbox"/>Show viewrange</span>
+                      </li>
+                      <li>
+                        <span><input id="path" type="checkbox"/>Show path</span>
+                      </li>
+                      <li>
+                        <span><input id="resources" type="checkbox"/>Show resources in viewrange</span>
+                      </li>
+                      <li>
+                        <span><input id="resourceAmount" type="checkbox"/>Show remaining resource amount</span>
+                      </li>
+                      <li>
+                        <span><input id="resourceItem" type="checkbox"/>Show selected resource</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

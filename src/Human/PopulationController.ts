@@ -22,40 +22,63 @@ class PopulationController {
     this.terrainController = terrainController;
     this.resourceController = resourceController;
     this.UIController = UIController;
+
+    document.querySelector("#random-male")?.addEventListener("click", () => {
+      this.addRandomMale();
+    });
+
+    document.querySelector("#random-female")?.addEventListener("click", () => {
+      this.addRandomFemale();
+    });
+
+    document.querySelector("#clear-all")?.addEventListener("click", () => {
+      this.population = [];
+      this.UIController.resetPopulation();
+    });
   }
 
   init(males: number = 2, females: number = 2) {
     for (let i = 0; i < males; i++) {
-      const man = new Human(
-        Gender.MALE,
-        this.UIController,
-        this.terrainController,
-        this.resourceController,
-        this
-      ).setPosition(
-        Vector2.copy(randChoice(this.terrainController.ground).position)
-      );
-
-      man.setGenes(Genetics.randomGenes());
-      man.notifyUI(1);
-      this.population.push(man);
+      this.addRandomMale();
     }
 
     for (let i = 0; i < females; i++) {
-      const woman = new Human(
-        Gender.FEMALE,
-        this.UIController,
-        this.terrainController,
-        this.resourceController,
-        this
-      ).setPosition(
-        Vector2.copy(randChoice(this.terrainController.ground).position)
-      );
-
-      woman.setGenes(Genetics.randomGenes());
-      woman.notifyUI(1);
-      this.population.push(woman);
+      this.addRandomFemale();
     }
+  }
+
+  addRandomMale() {
+    const man = new Human(
+      Gender.MALE,
+      this.UIController,
+      this.terrainController,
+      this.resourceController,
+      this
+    ).setPosition(
+      Vector2.copy(randChoice(this.terrainController.ground).position)
+    );
+
+    man.setGenes(Genetics.randomGenes());
+    man.notifyUI(1);
+    this.population.push(man);
+
+    return man;
+  }
+  
+  addRandomFemale() {
+    const woman = new Human(
+      Gender.FEMALE,
+      this.UIController,
+      this.terrainController,
+      this.resourceController,
+      this
+    ).setPosition(
+      Vector2.copy(randChoice(this.terrainController.ground).position)
+    );
+
+    woman.setGenes(Genetics.randomGenes());
+    woman.notifyUI(1);
+    this.population.push(woman);
   }
 
   update(deltaTime: number) {

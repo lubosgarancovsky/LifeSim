@@ -18,3 +18,11 @@ export function randomId() {
   }
   return result;
 }
+
+export function averageInt(a: number, b: number) {
+  return Math.round((a + b) / 2);
+}
+
+export function averageFloat(a: number, b: number) {
+  return (a + b) / 2;
+}
