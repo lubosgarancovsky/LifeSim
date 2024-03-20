@@ -1,6 +1,7 @@
 import { randChoice } from "../../utils/math";
 import ResourceController from "../Resources/ResourceController";
 import Terrain from "../Terrain/Terrain";
+import { Time } from "../Time";
 import UI from "../UI/UI";
 import { Vector2 } from "../Vector/Vector2";
 import Gender from "./Gender";
@@ -64,7 +65,7 @@ class PopulationController {
 
     return man;
   }
-  
+
   addRandomFemale() {
     const woman = new Human(
       Gender.FEMALE,
@@ -81,13 +82,13 @@ class PopulationController {
     this.population.push(woman);
   }
 
-  update(deltaTime: number) {
+  update() {
     const populationSize = this.population.length;
 
     if (populationSize > 0) {
       for (let i = 0; i < populationSize; i++) {
         if (this.population[i]) {
-          this.population[i].update(deltaTime);
+          this.population[i].update(Time.deltaTime);
         }
       }
 
