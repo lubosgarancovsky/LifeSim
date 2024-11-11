@@ -1,15 +1,15 @@
 import Circle from "../Geometry/Circle";
 import Settings from "../Settings";
-import Tile from "../Terrain/Tile";
+import TerrainTile from "../Terrain/TerrainTile";
 import { Vector2 } from "../Vector/Vector2";
 
 class Food extends Circle {
-  private parentTile: Tile;
+  private parentTile: TerrainTile;
   private maxAmount: number = 0;
   private amount: number = 0;
   isBeingGathered = false;
 
-  constructor(parent: Tile) {
+  constructor(parent: TerrainTile) {
     super();
 
     this.amount = Settings.settings.world.foodMaxAmount;
@@ -32,10 +32,14 @@ class Food extends Circle {
     return this.parentTile;
   }
 
-  update(deltaTime) {
+  update(deltaTime: number) {
     if (this.amount < this.maxAmount) {
       this.amount += Settings.settings.world.foodGrowingSpeed * deltaTime;
-      this.radius = ((this.amount / this.maxAmount) * 100) * (this.parentTile.size.x * 0.3) / 100;
+      this.radius =
+        ((this.amount / this.maxAmount) *
+          100 *
+          (this.parentTile.size.x * 0.3)) /
+        100;
     }
   }
 
@@ -59,6 +63,26 @@ class Food extends Circle {
 
   getMaxAmount() {
     return this.maxAmount;
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    ctx.beginPath();
+    ctx.fillStyle = this.fillStyle;
+    ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+    ctx.fill();
+
+    if (Settings.settings.debug.resourceAmount) {
+      ctx.fillStyle = "rgb(0,0,0)";
+      ctx.textAlign = "left";
+      ctx.font = "11px courier new";
+      ctx.fillText(
+        this.amount.toFixed(0).toString(),
+        this.position.x,
+        this.position.y
+      );
+    }
+
+    ctx.closePath();
   }
 }
 

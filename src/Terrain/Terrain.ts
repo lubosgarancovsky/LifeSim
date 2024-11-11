@@ -1,4 +1,4 @@
-import Tile from "./Tile";
+import Tile from "./TerrainTile";
 import { Vector2 } from "../Vector/Vector2";
 import perlinNoise3d from "perlin-noise-3d";
 import TerraintType from "./TerrainType";
@@ -109,6 +109,13 @@ class Terrain {
     }
 
     return subgrid;
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    const len = this.terrain.length;
+    for (let i = 0; i < len; i++) {
+      this.terrain[i].draw(ctx);
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-import Tile from "../src/Terrain/Tile";
+import TerrainTile from "../src/Terrain/TerrainTile";
 
 /**
  * Random integer in interval <0, 10) or numbers passed as optional parameters
@@ -129,9 +129,9 @@ export function distanceTo(
   return Math.hypot(dx, dy);
 }
 
-export function heuristic(node1: Tile, node2: Tile) {
-  let rowDistance = Math.abs(node1.coordinates.x - node2.coordinates.x)
-  let colDistance = Math.abs(node1.coordinates.y - node2.coordinates.y)
+export function heuristic(node1: TerrainTile, node2: TerrainTile) {
+  let rowDistance = Math.abs(node1.coordinates.x - node2.coordinates.x);
+  let colDistance = Math.abs(node1.coordinates.y - node2.coordinates.y);
 
-  return rowDistance + colDistance
+  return rowDistance + colDistance;
 }

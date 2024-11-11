@@ -2,11 +2,11 @@ import { Canvas } from "./src/Canvas/Canvas";
 import Lifesim from "./src/Lifesim";
 
 const canvas = new Canvas(".canvas", "#app");
-const game = new Lifesim(canvas);
+let game = new Lifesim(canvas);
 
 document.querySelector("#restart")?.addEventListener("click", () => {
-  game.init();
+  game = new Lifesim(canvas);
+  game.start();
 });
 
-game.init();
-game.run();
+game.start();

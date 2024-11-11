@@ -1,5 +1,6 @@
 import { randChoice } from "../../utils/math";
-import ResourceController from "../Resources/ResourceController";
+import { Resources } from "../Resources/Resources";
+
 import Terrain from "../Terrain/Terrain";
 import { Time } from "../Time";
 import UI from "../UI/UI";
@@ -8,20 +9,20 @@ import Gender from "./Gender";
 import { Genetics } from "./Genetics";
 import Human from "./Human";
 
-class PopulationController {
+export class Population {
   population: Human[];
   terrainController: Terrain;
-  resourceController: ResourceController;
+  Resources: Resources;
   UIController: UI;
 
   constructor(
     terrainController: Terrain,
-    resourceController: ResourceController,
+    Resources: Resources,
     UIController: UI
   ) {
     this.population = [];
     this.terrainController = terrainController;
-    this.resourceController = resourceController;
+    this.Resources = Resources;
     this.UIController = UIController;
 
     document.querySelector("#random-male")?.addEventListener("click", () => {
@@ -53,7 +54,7 @@ class PopulationController {
       Gender.MALE,
       this.UIController,
       this.terrainController,
-      this.resourceController,
+      this.Resources,
       this
     ).setPosition(
       Vector2.copy(randChoice(this.terrainController.ground).position)
@@ -71,7 +72,7 @@ class PopulationController {
       Gender.FEMALE,
       this.UIController,
       this.terrainController,
-      this.resourceController,
+      this.Resources,
       this
     ).setPosition(
       Vector2.copy(randChoice(this.terrainController.ground).position)
@@ -103,6 +104,11 @@ class PopulationController {
   updateUI() {
     this.UIController.drawPopulationList(this.population);
   }
-}
 
-export default PopulationController;
+  draw(ctx: CanvasRenderingContext2D) {
+    const len = this.population.length;
+    for (let i = 0; i < len; i++) {
+      this.population[i].draw(ctx);
+    }
+  }
+}

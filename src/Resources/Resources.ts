@@ -1,10 +1,10 @@
 import Settings from "../Settings";
 import Terrain from "../Terrain/Terrain";
 import TerraintType from "../Terrain/TerrainType";
-import Tile from "../Terrain/Tile";
+import Tile from "../Terrain/TerrainTile";
 import Food from "./Food";
 
-class ResourceController {
+export class Resources {
   terrainController: Terrain;
   food: Food[] = [];
 
@@ -41,6 +41,11 @@ class ResourceController {
     }
     return null;
   }
-}
 
-export default ResourceController;
+  draw(ctx: CanvasRenderingContext2D) {
+    const len = this.food.length;
+    for (let i = 0; i < len; i++) {
+      this.food[i].draw(ctx);
+    }
+  }
+}

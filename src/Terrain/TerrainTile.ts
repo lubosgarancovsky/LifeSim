@@ -5,14 +5,14 @@ import Settings from "../Settings";
 import { Vector2 } from "../Vector/Vector2";
 import TerraintType from "./TerrainType";
 
-class Tile extends Rect {
+class TerrainTile extends Rect {
   type: TerraintType;
-  neighbours: Tile[] = [];
+  neighbours: TerrainTile[] = [];
   coordinates: Vector2;
   f: number = 0;
   h: number = 0;
   g: number = 0;
-  parent: Tile | undefined = undefined;
+  parent: TerrainTile | undefined = undefined;
   resource: Resource | null = null;
 
   constructor(x_coord: number, y_coord: number, size: number) {
@@ -22,13 +22,16 @@ class Tile extends Rect {
     this.size = new Vector2(size, size);
   }
 
-  setTerrainType(type: TerraintType): Tile {
+  setTerrainType(type: TerraintType): TerrainTile {
     this.type = type;
-    this.fillStyle = type === TerraintType.GRASS ? Settings.settings.colors.grass : Settings.settings.colors.water;
+    this.fillStyle =
+      type === TerraintType.GRASS
+        ? Settings.settings.colors.grass
+        : Settings.settings.colors.water;
     this.strokeStyle =
       type === TerraintType.GRASS
         ? Settings.settings.colors.grassStroke
-        : Settings.settings.colors.waterStroke
+        : Settings.settings.colors.waterStroke;
     return this;
   }
 
@@ -42,7 +45,7 @@ class Tile extends Rect {
     this.resource = resource;
   }
 
-  getFirstWalkableNeighbour(grid: Tile[], rows: number, cols: number) {
+  getFirstWalkableNeighbour(grid: TerrainTile[], rows: number, cols: number) {
     let index = this.coordinates.y * rows + this.coordinates.x;
 
     // Bottom check
@@ -74,7 +77,6 @@ class Tile extends Rect {
     }
 
     // Diagonals (OPTIONAL)
-
     if (this.coordinates.y < cols - 1 && this.coordinates.x < rows - 1) {
       if (grid[index + rows + 1].type === TerraintType.GRASS) {
         return grid[index + rows + 1];
@@ -102,7 +104,7 @@ class Tile extends Rect {
     return null;
   }
 
-  updateNeighbours(grid: Tile[], rows: number, cols: number) {
+  updateNeighbours(grid: TerrainTile[], rows: number, cols: number) {
     let index = this.coordinates.y * rows + this.coordinates.x;
 
     // Bottom check
@@ -159,6 +161,16 @@ class Tile extends Rect {
       }
     }
   }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    ctx.beginPath();
+    ctx.fillStyle = this.fillStyle;
+    ctx.strokeStyle = this.strokeStyle;
+    ctx.rect(this.position.x, this.position.y, this.size.x, this.size.y);
+    ctx.fill();
+    ctx.stroke();
+    ctx.closePath();
+  }
 }
 
-export default Tile;
+export default TerrainTile;

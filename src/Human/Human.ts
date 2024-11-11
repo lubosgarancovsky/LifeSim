@@ -1,10 +1,11 @@
 import { heuristic, randChoice } from "../../utils/math";
 import { randomFemale, randomId, randomMale } from "../../utils/population";
 import Circle from "../Geometry/Circle";
-import ResourceController from "../Resources/ResourceController";
+import { Resources } from "../Resources/Resources";
+
 import Settings from "../Settings";
 import Terrain from "../Terrain/Terrain";
-import Tile from "../Terrain/Tile";
+import Tile from "../Terrain/TerrainTile";
 import UI from "../UI/UI";
 import { Vector2 } from "../Vector/Vector2";
 import Gender from "./Gender";
@@ -13,17 +14,17 @@ import Resource from "../Resources/Food";
 import { HumanDecisionTree } from "./DecisionTree/DecisionTree";
 import Food from "../Resources/Food";
 import TerraintType from "../Terrain/TerrainType";
-import PopulationController from "./PopulationController";
+import { Population } from "./Population";
 import { Genetics } from "./Genetics";
 
 class Human extends Circle {
-  name: string;
   id: string;
+  name: string;
   gender: Gender;
   UIController: UI;
   terrainController: Terrain;
-  resourceController: ResourceController;
-  populationController: PopulationController;
+  Resources: Resources;
+  populationController: Population;
 
   inViewSubgrid: Tile[] | null = null;
   path: Tile[] = [];
@@ -66,8 +67,8 @@ class Human extends Circle {
     gender: Gender,
     UIController: UI,
     terrainController: Terrain,
-    resourceController: ResourceController,
-    populationController: PopulationController
+    Resources: Resources,
+    populationController: Population
   ) {
     super();
 
@@ -75,7 +76,7 @@ class Human extends Circle {
 
     this.UIController = UIController;
     this.terrainController = terrainController;
-    this.resourceController = resourceController;
+    this.Resources = Resources;
     this.populationController = populationController;
 
     this.gender = gender;
@@ -692,7 +693,7 @@ class Human extends Circle {
           randChoice([Gender.MALE, Gender.FEMALE]),
           this.UIController,
           this.terrainController,
-          this.resourceController,
+          this.Resources,
           this.populationController
         );
 
@@ -747,6 +748,208 @@ class Human extends Circle {
       this.isChild = false;
       this.radius = Settings.settings.world.tileSize * 0.25;
     }
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    ctx.beginPath();
+    ctx.lineWidth = 1;
+    ctx.fillStyle = this.fillStyle;
+    ctx.strokeStyle = this.strokeStyle;
+
+    ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+    ctx.fill();
+
+    ctx.stroke();
+
+    if (Settings.settings.game.hud) {
+      this.drawHud(ctx);
+    }
+
+    if (Settings.settings.debug.path) {
+      this.drawPath(ctx);
+    }
+
+    if (Settings.settings.debug.viewRange) {
+      this.drawViewRange(ctx);
+    }
+
+    if (Settings.settings.debug.resources) {
+      this.drawResources(ctx);
+    }
+
+    if (Settings.settings.debug.resourceItem) {
+      this.drawResourceItem(ctx);
+    }
+
+    this.drawProgressBar(ctx);
+    ctx.closePath();
+  }
+
+  private drawHud(ctx: CanvasRenderingContext2D) {
+    ctx.fillStyle = "rgb(0,0,0)";
+    ctx.textAlign = "left";
+
+    // Name and Age
+    ctx.font = "11px courier new";
+    ctx.fillText(
+      `${this.age.toFixed(0)} ${this.name}`,
+      this.position.x - this.radius,
+      this.position.y - this.radius - 15
+    );
+
+    // Current state
+    ctx.font = "11px courier new";
+    ctx.fillText(
+      this.state,
+      this.position.x - this.radius,
+      this.position.y - this.radius - 5
+    );
+
+    // Needs Wrapper
+    ctx.fillStyle = Settings.settings.colors.hudWrapper;
+    ctx.fillRect(
+      this.position.x + this.radius + 5,
+      this.position.y - this.radius / 2,
+      30,
+      9
+    );
+
+    // Hunger
+    ctx.fillStyle = "#f08a65";
+    ctx.fillRect(
+      this.position.x + this.radius + 5,
+      this.position.y - this.radius / 2,
+      (this.hunger / 100) * 30,
+      3
+    );
+
+    // Thirst
+    ctx.fillStyle = "#00b9fc";
+    ctx.fillRect(
+      this.position.x + this.radius + 5,
+      this.position.y - this.radius / 2 + 3,
+      (this.thirst / 100) * 30,
+      3
+    );
+
+    // Mating urge
+    ctx.fillStyle = "#f51b59";
+    ctx.fillRect(
+      this.position.x + this.radius + 5,
+      this.position.y - this.radius / 2 + 6,
+      (this.matingUrge / 100) * 30,
+      3
+    );
+  }
+
+  private drawPath(ctx: CanvasRenderingContext2D) {
+    ctx.beginPath();
+    const path = this.path;
+    if (!!path) {
+      for (let i = 0; i < path.length; i++) {
+        ctx.fillStyle = "rgba(255,50,50,0.2)";
+        ctx.strokeStyle = "rgba(255, 50, 50)";
+
+        const tile = path[i];
+        ctx.rect(tile.position.x, tile.position.y, tile.size.x, tile.size.y);
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+    ctx.closePath();
+  }
+
+  private drawViewRange(ctx: CanvasRenderingContext2D) {
+    ctx.beginPath();
+
+    const subgrid = this.inViewSubgrid;
+
+    if (!!subgrid) {
+      const viewRangeSize =
+        Settings.settings.world.tileSize * (this.genes.viewRange * 2 + 1);
+
+      ctx.fillStyle = "rgba(0, 0, 0, 0)";
+      ctx.strokeStyle = "rgb(255, 255, 255)";
+      ctx.fillRect(
+        subgrid[0].position.x,
+        subgrid[0].position.y,
+        viewRangeSize,
+        viewRangeSize
+      );
+    }
+    ctx.closePath();
+  }
+
+  private drawResources(ctx: CanvasRenderingContext2D) {
+    ctx.beginPath();
+
+    const resources = this.getVisibleResources();
+    if (!!resources) {
+      for (let i = 0; i < resources.length; i++) {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+        ctx.strokeStyle = "rgb(255, 255, 255)";
+
+        ctx.rect(
+          resources[i].getParent().position.x,
+          resources[i].getParent().position.y,
+          resources[i].getParent().size.x,
+          resources[i].getParent().size.y
+        );
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+    ctx.closePath();
+  }
+
+  private drawResourceItem(ctx: CanvasRenderingContext2D) {
+    ctx.beginPath();
+    if (this.foundWaterObject) {
+      ctx.fillStyle = "rgba(0, 0, 0, 0)";
+      ctx.strokeStyle = "rgb(255, 255, 255)";
+      ctx.fillRect(
+        this.foundWaterObject.position.x,
+        this.foundWaterObject.position.y,
+        this.foundWaterObject.size.x,
+        this.foundWaterObject.size.y
+      );
+    }
+
+    if (this.foundFoodObject) {
+      ctx.fillStyle = "rgba(0, 0, 0, 0)";
+      ctx.strokeStyle = "#baa820";
+      const parent = this.foundFoodObject.getParent();
+      ctx.fillRect(
+        parent.position.x,
+        parent.position.y,
+        parent.size.x,
+        parent.size.y
+      );
+    }
+    ctx.closePath();
+  }
+
+  private drawProgressBar(ctx: CanvasRenderingContext2D) {
+    if (this.progressBar <= 0) return;
+
+    ctx.beginPath();
+    ctx.fillStyle = Settings.settings.colors.progressbarBG;
+    ctx.fillRect(
+      this.position.x - this.radius * 1.5,
+      this.position.y + this.radius * 2,
+      this.radius * 3,
+      3
+    );
+
+    ctx.fillStyle = Settings.settings.colors.progressbarFG;
+    ctx.fillRect(
+      this.position.x - this.radius * 1.5,
+      this.position.y + this.radius * 2,
+      ((this.radius * 3) / 100) * this.progressBar,
+      3
+    );
+
+    ctx.closePath();
   }
 }
 
