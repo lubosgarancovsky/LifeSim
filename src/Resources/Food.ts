@@ -1,6 +1,7 @@
 import Circle from "../Geometry/Circle";
 import Settings from "../Settings";
 import TerrainTile from "../Terrain/TerrainTile";
+import { Time } from "../Time";
 import { Vector2 } from "../Vector/Vector2";
 
 class Food extends Circle {
@@ -32,9 +33,9 @@ class Food extends Circle {
     return this.parentTile;
   }
 
-  update(deltaTime: number) {
+  update() {
     if (this.amount < this.maxAmount) {
-      this.amount += Settings.settings.world.foodGrowingSpeed * deltaTime;
+      this.amount += Settings.settings.world.foodGrowingSpeed * Time.deltaTime;
       this.radius =
         ((this.amount / this.maxAmount) *
           100 *

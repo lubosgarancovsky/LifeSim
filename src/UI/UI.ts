@@ -1,6 +1,6 @@
 import Gender from "../Human/Gender";
 import Human from "../Human/Human";
-import Settings from '../Settings'
+import Settings from "../Settings";
 
 class UI {
   private population: any = {
@@ -24,6 +24,7 @@ class UI {
   };
   private settingsNodes: any = {
     viewRange: null,
+    subgrid: null,
     path: null,
     resources: null,
     resourceAmount: null,
@@ -41,7 +42,7 @@ class UI {
     waterDensity: null,
     foodDensity: null,
     foodMaxAmount: null,
-  }
+  };
 
   constructor() {
     this.UIElements.population = document.querySelector(
@@ -69,101 +70,142 @@ class UI {
       "#command-section-population-list"
     ) as HTMLDivElement;
 
-    this.settingsNodes.viewRange = document.querySelector('#viewRange') as HTMLInputElement;
-    this.settingsNodes.path = document.querySelector('#path') as HTMLInputElement;
-    this.settingsNodes.resources = document.querySelector('#resources') as HTMLInputElement;
-    this.settingsNodes.resourceAmount = document.querySelector('#resourceAmount') as HTMLInputElement;
-    this.settingsNodes.resourceItem = document.querySelector('#resourceItem') as HTMLInputElement;
+    this.settingsNodes.viewRange = document.querySelector(
+      "#viewRange"
+    ) as HTMLInputElement;
+    this.settingsNodes.subgrid = document.querySelector(
+      "#subgrid"
+    ) as HTMLInputElement;
+    this.settingsNodes.path = document.querySelector(
+      "#path"
+    ) as HTMLInputElement;
+    this.settingsNodes.resources = document.querySelector(
+      "#resources"
+    ) as HTMLInputElement;
+    this.settingsNodes.resourceAmount = document.querySelector(
+      "#resourceAmount"
+    ) as HTMLInputElement;
+    this.settingsNodes.resourceItem = document.querySelector(
+      "#resourceItem"
+    ) as HTMLInputElement;
 
-    this.settingsNodes.males = document.querySelector('#males') as HTMLInputElement;
-    this.settingsNodes.females = document.querySelector('#females') as HTMLInputElement;
-    this.settingsNodes.hud = document.querySelector('#hud') as HTMLInputElement;
-    this.settingsNodes.food = document.querySelector('#food') as HTMLInputElement;
-    this.settingsNodes.water = document.querySelector('#water') as HTMLInputElement;
-    this.settingsNodes.pregnancy = document.querySelector('#pregnancy') as HTMLInputElement;
-    this.settingsNodes.adultAge = document.querySelector('#adultAge') as HTMLInputElement;
-    this.settingsNodes.pregnancyChance = document.querySelector('#chance') as HTMLInputElement;
+    this.settingsNodes.males = document.querySelector(
+      "#males"
+    ) as HTMLInputElement;
+    this.settingsNodes.females = document.querySelector(
+      "#females"
+    ) as HTMLInputElement;
+    this.settingsNodes.hud = document.querySelector("#hud") as HTMLInputElement;
+    this.settingsNodes.food = document.querySelector(
+      "#food"
+    ) as HTMLInputElement;
+    this.settingsNodes.water = document.querySelector(
+      "#water"
+    ) as HTMLInputElement;
+    this.settingsNodes.pregnancy = document.querySelector(
+      "#pregnancy"
+    ) as HTMLInputElement;
+    this.settingsNodes.adultAge = document.querySelector(
+      "#adultAge"
+    ) as HTMLInputElement;
+    this.settingsNodes.pregnancyChance = document.querySelector(
+      "#chance"
+    ) as HTMLInputElement;
 
-    this.settingsNodes.growSpeed = document.querySelector('#growSpeed') as HTMLInputElement;
-    this.settingsNodes.tileSize = document.querySelector('#tileSize') as HTMLInputElement;
-    this.settingsNodes.waterDensity = document.querySelector('#waterDensity') as HTMLInputElement;
-    this.settingsNodes.foodDensity = document.querySelector('#foodDensity') as HTMLInputElement;
-    this.settingsNodes.foodMaxAmount = document.querySelector('#foodMaxAmount') as HTMLInputElement;
+    this.settingsNodes.growSpeed = document.querySelector(
+      "#growSpeed"
+    ) as HTMLInputElement;
+    this.settingsNodes.tileSize = document.querySelector(
+      "#tileSize"
+    ) as HTMLInputElement;
+    this.settingsNodes.waterDensity = document.querySelector(
+      "#waterDensity"
+    ) as HTMLInputElement;
+    this.settingsNodes.foodDensity = document.querySelector(
+      "#foodDensity"
+    ) as HTMLInputElement;
+    this.settingsNodes.foodMaxAmount = document.querySelector(
+      "#foodMaxAmount"
+    ) as HTMLInputElement;
 
     //DEBUG
-    this.settingsNodes.viewRange.addEventListener('change', (e) => {
+    this.settingsNodes.viewRange.addEventListener("change", (e) => {
       Settings.settings.debug.viewRange = e.target.checked;
-    })
+    });
 
-    this.settingsNodes.path.addEventListener('change', (e) => {
+    this.settingsNodes.subgrid.addEventListener("change", (e) => {
+      Settings.settings.debug.subgrid = e.target.checked;
+    });
+
+    this.settingsNodes.path.addEventListener("change", (e) => {
       Settings.settings.debug.path = e.target.checked;
-    })
+    });
 
-    this.settingsNodes.resources.addEventListener('change', (e) => {
+    this.settingsNodes.resources.addEventListener("change", (e) => {
       Settings.settings.debug.resources = e.target.checked;
-    })
+    });
 
-    this.settingsNodes.resourceAmount.addEventListener('change', (e) => {
+    this.settingsNodes.resourceAmount.addEventListener("change", (e) => {
       Settings.settings.debug.resourceAmount = e.target.checked;
-    })
+    });
 
-    this.settingsNodes.resourceItem.addEventListener('change', (e) => {
+    this.settingsNodes.resourceItem.addEventListener("change", (e) => {
       Settings.settings.debug.resourceItem = e.target.checked;
-    })
+    });
 
     // GAME
-    this.settingsNodes.males.addEventListener('change', (e) => {
+    this.settingsNodes.males.addEventListener("change", (e) => {
       Settings.settings.game.males = e.target.value;
-    })
+    });
 
-    this.settingsNodes.females.addEventListener('change', (e) => {
+    this.settingsNodes.females.addEventListener("change", (e) => {
       Settings.settings.game.females = e.target.value;
-    })
+    });
 
-    this.settingsNodes.hud.addEventListener('change', (e) => {
+    this.settingsNodes.hud.addEventListener("change", (e) => {
       Settings.settings.game.hud = e.target.checked;
-    })
+    });
 
-    this.settingsNodes.food.addEventListener('change', (e) => {
+    this.settingsNodes.food.addEventListener("change", (e) => {
       Settings.settings.game.foodInventoryLimit = e.target.value;
-    })
+    });
 
-    this.settingsNodes.water.addEventListener('change', (e) => {
+    this.settingsNodes.water.addEventListener("change", (e) => {
       Settings.settings.game.waterInventoryLimit = e.target.value;
-    })
+    });
 
-    this.settingsNodes.pregnancy.addEventListener('change', (e) => {
+    this.settingsNodes.pregnancy.addEventListener("change", (e) => {
       Settings.settings.game.pregnancyMeterSpeed = e.target.value;
-    })
+    });
 
-    this.settingsNodes.pregnancyChance.addEventListener('change', (e) => {
+    this.settingsNodes.pregnancyChance.addEventListener("change", (e) => {
       Settings.settings.game.pregnancyChance = e.target.value;
-    })
+    });
 
-    this.settingsNodes.adultAge.addEventListener('change', (e) => {
+    this.settingsNodes.adultAge.addEventListener("change", (e) => {
       Settings.settings.game.adultAge = e.target.value;
-    })
+    });
 
     // World
-    this.settingsNodes.growSpeed.addEventListener('change', (e) => {
+    this.settingsNodes.growSpeed.addEventListener("change", (e) => {
       Settings.settings.world.foodGrowingSpeed = e.target.value;
-    })
+    });
 
-    this.settingsNodes.tileSize.addEventListener('change', (e) => {
+    this.settingsNodes.tileSize.addEventListener("change", (e) => {
       Settings.settings.world.tileSize = e.target.value;
-    })
+    });
 
-    this.settingsNodes.waterDensity.addEventListener('change', (e) => {
+    this.settingsNodes.waterDensity.addEventListener("change", (e) => {
       Settings.settings.world.waterDensity = e.target.value;
-    })
+    });
 
-    this.settingsNodes.foodDensity.addEventListener('change', (e) => {
+    this.settingsNodes.foodDensity.addEventListener("change", (e) => {
       Settings.settings.world.foodDensity = e.target.value;
-    })
+    });
 
-    this.settingsNodes.foodMaxAmount.addEventListener('change', (e) => {
+    this.settingsNodes.foodMaxAmount.addEventListener("change", (e) => {
       Settings.settings.world.foodMaxAmount = e.target.value;
-    })
+    });
 
     this.UIElements.commandButton.addEventListener("click", () => {
       this.state.command = !this.state.command;
@@ -173,7 +215,7 @@ class UI {
         this.UIElements.commandSection.classList.add("hidden");
       }
 
-      if(this.state.settings) {
+      if (this.state.settings) {
         this.state.settings = false;
         this.UIElements.settingsSection.classList.add("hidden");
       }
@@ -187,7 +229,7 @@ class UI {
         this.UIElements.settingsSection.classList.add("hidden");
       }
 
-      if(this.state.command){
+      if (this.state.command) {
         this.state.command = false;
         this.UIElements.commandSection.classList.add("hidden");
       }

@@ -16,6 +16,7 @@ import Food from "../Resources/Food";
 import TerraintType from "../Terrain/TerrainType";
 import { Population } from "./Population";
 import { Genetics } from "./Genetics";
+import { Time } from "../Time";
 
 class Human extends Circle {
   id: string;
@@ -26,10 +27,8 @@ class Human extends Circle {
   Resources: Resources;
   populationController: Population;
 
-  inViewSubgrid: Tile[] | null = null;
   path: Tile[] = [];
   destination: Vector2 | null;
-  deltaTime: number;
   inventory: Inventory;
   progressBar: number = 0;
 
@@ -62,6 +61,8 @@ class Human extends Circle {
   age: number = 0;
   lastAge: number = 0;
   isChild: boolean = true;
+
+  private inViewSubgrid: Tile[] = [];
 
   constructor(
     gender: Gender,
@@ -98,19 +99,15 @@ class Human extends Circle {
     this.state = "Wandering";
   }
 
-  update(deltaTime: number) {
-    this.getSubgridInView();
-
-    this.deltaTime = deltaTime;
-
+  update() {
     this.decisionTree.evaluate(this);
 
-    this.handleNeedsIncrement(deltaTime);
+    this.handleNeedsIncrement();
 
-    this.handleAging(deltaTime);
+    this.handleAging();
 
     if (this.isPregnant) {
-      this.handlePregnancy(deltaTime);
+      this.handlePregnancy();
     }
   }
 
@@ -118,16 +115,16 @@ class Human extends Circle {
     this.genes = gen;
   }
 
-  handleNeedsIncrement(deltaTime) {
-    this.hunger += this.genes.hungerModificator * deltaTime;
-    this.thirst += this.genes.thirstModificator * deltaTime;
+  handleNeedsIncrement() {
+    this.hunger += this.genes.hungerModificator * Time.deltaTime;
+    this.thirst += this.genes.thirstModificator * Time.deltaTime;
 
     if (!this.isChild) {
       if (this.age <= 34) {
-        this.matingUrge += this.genes.matingModificator * deltaTime * 1.5;
+        this.matingUrge += this.genes.matingModificator * Time.deltaTime * 1.5;
       } else {
         this.matingUrge +=
-          this.genes.matingModificator * (1 - this.age / 200) * deltaTime;
+          this.genes.matingModificator * (1 - this.age / 200) * Time.deltaTime;
       }
     }
 
@@ -172,8 +169,8 @@ class Human extends Circle {
         this.destination.x - this.position.x
       );
 
-      const dx = Math.cos(radians) * this.genes.speed * this.deltaTime;
-      const dy = Math.sin(radians) * this.genes.speed * this.deltaTime;
+      const dx = Math.cos(radians) * this.genes.speed * Time.deltaTime;
+      const dy = Math.sin(radians) * this.genes.speed * Time.deltaTime;
 
       // keep returning until destination is reached
       if (distance > 1) {
@@ -181,6 +178,8 @@ class Human extends Circle {
         this.position.y += dy;
         return;
       }
+
+      this.inViewSubgrid = [];
 
       // Human came to the end of a path iteration, if there is another tile in path, it finds a destination inside the tile
       if (this.path.length > 1) {
@@ -199,16 +198,9 @@ class Human extends Circle {
   }
 
   findRandomDestination() {
-    if (this.inViewSubgrid) {
-      const randomTile = randChoice(this.inViewSubgrid);
-      this.findPath(randomTile);
-    }
-  }
-
-  drawpath() {
-    for (let i = 0; i < this.path.length; i++) {
-      this.path[i].fillStyle = "rgba(255, 0, 0, 1)";
-    }
+    const subgrid = this.getSubgridInView();
+    const randomTile = randChoice(subgrid);
+    this.findPath(randomTile);
   }
 
   findPath(endTile: Tile) {
@@ -288,24 +280,29 @@ class Human extends Circle {
     this.destination = null;
   }
 
-  getSubgridInView() {
-    this.inViewSubgrid = this.terrainController.getSubGrid(
+  getSubgridInView(): Tile[] {
+    if (this.inViewSubgrid.length > 0) {
+      return this.inViewSubgrid;
+    }
+
+    const subgrid = this.terrainController.getSubGrid(
       this.position.x,
       this.position.y,
       this.genes.viewRange
     );
+
+    this.inViewSubgrid = subgrid;
+    return subgrid;
   }
 
   getVisibleResources() {
-    if (!this.inViewSubgrid?.length) {
-      return [];
-    }
+    const subgrid = this.getSubgridInView();
 
     const resourceArray: Resource[] = [];
 
-    for (let i = 0; i < this.inViewSubgrid.length; i++) {
-      if (!!this.inViewSubgrid[i].resource) {
-        resourceArray.push(this.inViewSubgrid[i].resource!);
+    for (let i = 0; i < subgrid.length; i++) {
+      if (!!subgrid[i].resource) {
+        resourceArray.push(subgrid[i].resource!);
       }
     }
 
@@ -376,7 +373,7 @@ class Human extends Circle {
       this.progressBar = 0;
     };
 
-    const amountToEat = 50 * this.deltaTime;
+    const amountToEat = 50 * Time.deltaTime;
 
     if (this.inventory.food > 0) {
       this.hunger -= amountToEat;
@@ -405,47 +402,40 @@ class Human extends Circle {
   }
 
   findWaterResource() {
-    if (!!this.inViewSubgrid?.length) {
-      const grid = this.inViewSubgrid;
-      const water: Tile[] = [];
+    const grid = this.getSubgridInView();
+    const water: Tile[] = [];
 
-      for (let i = 0; i < grid.length; i++) {
-        if (grid[i].type === TerraintType.WATER) {
-          water.push(grid[i]);
+    for (let i = 0; i < grid.length; i++) {
+      if (grid[i].type === TerraintType.WATER) {
+        water.push(grid[i]);
+      }
+    }
+
+    if (!!water.length) {
+      let minDistance = Vector2.distance(this.position, water[0].getCenter());
+      let closestWater = water[0];
+
+      for (let i = 0; i < water.length; i++) {
+        const distance = Vector2.distance(this.position, water[i].getCenter());
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestWater = water[i];
         }
       }
 
-      if (!!water.length) {
-        let minDistance = Vector2.distance(this.position, water[0].getCenter());
-        let closestWater = water[0];
+      // finds path to the closest grass tile
 
-        for (let i = 0; i < water.length; i++) {
-          const distance = Vector2.distance(
-            this.position,
-            water[i].getCenter()
-          );
+      const firstWalkableNeighbour = closestWater.getFirstWalkableNeighbour(
+        this.terrainController.terrain,
+        this.terrainController.WIDTH,
+        this.terrainController.HEIGHT
+      );
 
-          if (distance < minDistance) {
-            minDistance = distance;
-            closestWater = water[i];
-          }
-        }
-
-        // finds path to the closest grass tile
-
-        const firstWalkableNeighbour = closestWater.getFirstWalkableNeighbour(
-          this.terrainController.terrain,
-          this.terrainController.WIDTH,
-          this.terrainController.HEIGHT
-        );
-
-        if (!!firstWalkableNeighbour) {
-          this.foundWaterObject = closestWater;
-          this.findPath(firstWalkableNeighbour);
-          return closestWater;
-        }
-
-        return null;
+      if (!!firstWalkableNeighbour) {
+        this.foundWaterObject = closestWater;
+        this.findPath(firstWalkableNeighbour);
+        return closestWater;
       }
 
       return null;
@@ -462,7 +452,7 @@ class Human extends Circle {
       this.progressBar = 0;
     };
 
-    const amountToDrink = 50 * this.deltaTime;
+    const amountToDrink = 50 * Time.deltaTime;
 
     if (this.inventory.water > 0) {
       this.thirst -= amountToDrink;
@@ -494,7 +484,7 @@ class Human extends Circle {
       this.move();
     };
 
-    const amountToCollect = 20 * this.deltaTime;
+    const amountToCollect = 20 * Time.deltaTime;
 
     if (this.foundFoodObject) {
       this.inventory.addFood(this.foundFoodObject.gather(amountToCollect));
@@ -523,7 +513,7 @@ class Human extends Circle {
       this.move();
     };
 
-    const amountToCollect = 20 * this.deltaTime;
+    const amountToCollect = 20 * Time.deltaTime;
 
     if (this.foundWaterObject) {
       this.inventory.addWater(amountToCollect);
@@ -544,7 +534,7 @@ class Human extends Circle {
   }
 
   findMate() {
-    if (!!this.inViewSubgrid && !this.foundMate) {
+    if (!this.foundMate) {
       const population = this.populationController.population;
       const size = population.length;
 
@@ -557,7 +547,8 @@ class Human extends Circle {
           potentialMate != this
         ) {
           if (this.humanCollidesWithViewrange(potentialMate)) {
-            const randomPoint = randChoice(this.inViewSubgrid);
+            const subgrid = this.getSubgridInView();
+            const randomPoint = randChoice(subgrid);
 
             this.findPath(randomPoint);
             potentialMate.findPath(randomPoint);
@@ -597,8 +588,8 @@ class Human extends Circle {
   handleMating() {
     if (!!this.foundMate) {
       if (this.foundMate.isMating && this.isMating) {
-        this.progressBar += 30 * this.deltaTime;
-        this.foundMate.progressBar += 30 * this.foundMate.deltaTime;
+        this.progressBar += 30 * Time.deltaTime;
+        this.foundMate.progressBar += 30 * Time.deltaTime;
       }
 
       if (this.foundMate.progressBar >= 100 && this.progressBar >= 100) {
@@ -619,43 +610,42 @@ class Human extends Circle {
   }
 
   humanCollidesWithViewrange(human: Human) {
-    if (!!this.inViewSubgrid) {
-      const viewRangeStartPosition = this.inViewSubgrid[0].position;
-      const viewRangeSize =
-        (this.genes.viewRange * 2 + 1) * Settings.settings.world.tileSize;
+    const subgrid = this.getSubgridInView();
 
-      // Calculate the center of the square
-      const squareCenter = {
-        x: viewRangeStartPosition.x + viewRangeSize / 2,
-        y: viewRangeStartPosition.y + viewRangeSize / 2,
-      };
+    const viewRangeStartPosition = subgrid[0].position;
+    const viewRangeSize =
+      (this.genes.viewRange * 2 + 1) * Settings.settings.world.tileSize;
 
-      // Calculate the distance between the center of the circle and the center of the square
-      const distanceX = Math.abs(human.position.x - squareCenter.x);
-      const distanceY = Math.abs(human.position.y - squareCenter.y);
+    // Calculate the center of the square
+    const squareCenter = {
+      x: viewRangeStartPosition.x + viewRangeSize / 2,
+      y: viewRangeStartPosition.y + viewRangeSize / 2,
+    };
 
-      // If the distance is greater than half the diagonal of the square plus the radius of the circle, there is no collision
-      const diagonal = Math.sqrt(viewRangeSize ** 2 + viewRangeSize ** 2);
-      if (
-        distanceX > diagonal / 2 + human.radius ||
-        distanceY > diagonal / 2 + human.radius
-      ) {
-        return false;
-      }
+    // Calculate the distance between the center of the circle and the center of the square
+    const distanceX = Math.abs(human.position.x - squareCenter.x);
+    const distanceY = Math.abs(human.position.y - squareCenter.y);
 
-      // If the distance is less than half the diagonal of the square, there is definitely a collision
-      if (distanceX <= viewRangeSize / 2 || distanceY <= viewRangeSize / 2) {
-        return true;
-      }
-
-      // If the distance is between these two values, there is a collision if the distance from the center of the circle to
-      // the closest point on the square is less than or equal to the radius of the circle
-      const cornerDistanceSquared =
-        (distanceX - viewRangeSize / 2) ** 2 +
-        (distanceY - viewRangeSize / 2) ** 2;
-      return cornerDistanceSquared <= human.radius ** 2;
+    // If the distance is greater than half the diagonal of the square plus the radius of the circle, there is no collision
+    const diagonal = Math.sqrt(viewRangeSize ** 2 + viewRangeSize ** 2);
+    if (
+      distanceX > diagonal / 2 + human.radius ||
+      distanceY > diagonal / 2 + human.radius
+    ) {
+      return false;
     }
-    return false;
+
+    // If the distance is less than half the diagonal of the square, there is definitely a collision
+    if (distanceX <= viewRangeSize / 2 || distanceY <= viewRangeSize / 2) {
+      return true;
+    }
+
+    // If the distance is between these two values, there is a collision if the distance from the center of the circle to
+    // the closest point on the square is less than or equal to the radius of the circle
+    const cornerDistanceSquared =
+      (distanceX - viewRangeSize / 2) ** 2 +
+      (distanceY - viewRangeSize / 2) ** 2;
+    return cornerDistanceSquared <= human.radius ** 2;
   }
 
   getPregnant(father: Human) {
@@ -705,9 +695,9 @@ class Human extends Circle {
     }
   }
 
-  handlePregnancy(deltaTime: number) {
+  handlePregnancy() {
     this.pregnancyMeter +=
-      Settings.settings.game.pregnancyMeterSpeed * deltaTime;
+      Settings.settings.game.pregnancyMeterSpeed * Time.deltaTime;
 
     if (this.pregnancyMeter >= 100) {
       this.pregnancyMeter = 0;
@@ -723,8 +713,8 @@ class Human extends Circle {
     }
   }
 
-  handleAging(deltaTime: number) {
-    this.age += Settings.settings.game.agingSpeed * deltaTime;
+  handleAging() {
+    this.age += Settings.settings.game.agingSpeed * Time.deltaTime;
 
     if (this.age < 0) {
       this.age = 0;
@@ -779,6 +769,10 @@ class Human extends Circle {
 
     if (Settings.settings.debug.resourceItem) {
       this.drawResourceItem(ctx);
+    }
+
+    if (Settings.settings.debug.subgrid) {
+      this.drawSubgrid(ctx);
     }
 
     this.drawProgressBar(ctx);
@@ -862,20 +856,34 @@ class Human extends Circle {
   private drawViewRange(ctx: CanvasRenderingContext2D) {
     ctx.beginPath();
 
-    const subgrid = this.inViewSubgrid;
+    ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+    ctx.strokeStyle = "rgb(255, 255, 255)";
 
-    if (!!subgrid) {
-      const viewRangeSize =
-        Settings.settings.world.tileSize * (this.genes.viewRange * 2 + 1);
+    ctx.arc(
+      this.position.x,
+      this.position.y,
+      this.genes.viewRange,
+      0,
+      2 * Math.PI
+    );
+    ctx.fill();
+    ctx.stroke();
 
-      ctx.fillStyle = "rgba(0, 0, 0, 0)";
-      ctx.strokeStyle = "rgb(255, 255, 255)";
-      ctx.fillRect(
-        subgrid[0].position.x,
-        subgrid[0].position.y,
-        viewRangeSize,
-        viewRangeSize
-      );
+    ctx.closePath();
+  }
+
+  private drawSubgrid(ctx: CanvasRenderingContext2D) {
+    const subgrid = this.getSubgridInView();
+
+    ctx.beginPath();
+    const len = subgrid.length;
+    for (let i = 0; i < len; i++) {
+      const tile = subgrid[i];
+      ctx.fillStyle = "rgba(255,50,50,0)";
+      ctx.strokeStyle = "rgba(50, 50, 255)";
+      ctx.rect(tile.position.x, tile.position.y, tile.size.x, tile.size.y);
+      ctx.fill();
+      ctx.stroke();
     }
     ctx.closePath();
   }

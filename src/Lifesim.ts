@@ -93,7 +93,7 @@ class Lifesim {
     const size = this.resources.food.length;
 
     for (let i = 0; i < size; i++) {
-      resources[i].update(Time.deltaTime);
+      resources[i].update();
     }
   }
 }
