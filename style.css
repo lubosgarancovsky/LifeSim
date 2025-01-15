@@ -51,6 +51,7 @@ canvas {
   left: 0;
   top: 0;
   color: rgb(225, 225, 225);
+  z-index: 50;
 }
 
 .inline-container {
