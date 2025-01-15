@@ -14,9 +14,11 @@ class Lifesim {
   private ui: UI;
 
   private canvas: Canvas;
+  private canvasBg: Canvas;
 
-  constructor(canvas: Canvas) {
+  constructor(canvas: Canvas, canvasBg: Canvas) {
     this.canvas = canvas;
+    this.canvasBg = canvasBg;
     this.isRunning = false;
     this.loop = this.loop.bind(this);
 
@@ -49,6 +51,8 @@ class Lifesim {
         this.stop();
       }
     });
+
+    this.terrain.draw(this.canvasBg.context);
   }
 
   start() {
@@ -82,9 +86,8 @@ class Lifesim {
   }
 
   private render() {
-    const context = this.canvas.context;
-    this.terrain.draw(context);
-    this.resources.draw(context);
+    this.canvas.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.resources.draw(this.canvas.context);
     this.population.draw(this.canvas.context);
   }
 
